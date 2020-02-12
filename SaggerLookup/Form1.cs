@@ -30,6 +30,12 @@ namespace SaggerLookup
         public Form1()
         {
             InitializeComponent();
+
+            toolTip1.SetToolTip(txtFields, "Use comma separated values");
+            toolTip1.SetToolTip(txtOperator, "Available operators are:\neq - Equals specified value\ngt - Greater than specified value\nlt - Less than specified value\ncontains - Contains specified value\nstartswit - Starts with specified value");
+            toolTip1.SetToolTip(txtObjectList, "Use comma separated values");
+
+
         }
 
         private async void Login_Click(object sender, EventArgs e)

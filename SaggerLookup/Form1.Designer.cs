@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnLogin = new System.Windows.Forms.Button();
             this.txtEndPoint = new System.Windows.Forms.TextBox();
             this.lblEndPoint = new System.Windows.Forms.Label();
@@ -66,6 +67,8 @@
             this.tabDbBasics = new System.Windows.Forms.TabPage();
             this.tabLookup = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label6 = new System.Windows.Forms.Label();
             this.tabControl.SuspendLayout();
             this.tabDbBasics.SuspendLayout();
             this.tabLookup.SuspendLayout();
@@ -356,6 +359,7 @@
             this.txtFilterList.Location = new System.Drawing.Point(490, 29);
             this.txtFilterList.Multiline = true;
             this.txtFilterList.Name = "txtFilterList";
+            this.txtFilterList.ReadOnly = true;
             this.txtFilterList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtFilterList.Size = new System.Drawing.Size(319, 397);
             this.txtFilterList.TabIndex = 36;
@@ -425,6 +429,7 @@
             this.tabLookup.Controls.Add(this.txtValue);
             this.tabLookup.Controls.Add(this.label2);
             this.tabLookup.Controls.Add(this.txtOperator);
+            this.tabLookup.Controls.Add(this.label6);
             this.tabLookup.Location = new System.Drawing.Point(4, 25);
             this.tabLookup.Name = "tabLookup";
             this.tabLookup.Padding = new System.Windows.Forms.Padding(3);
@@ -441,6 +446,17 @@
             this.label1.Size = new System.Drawing.Size(44, 17);
             this.label1.TabIndex = 38;
             this.label1.Text = "Tabel";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(225, 211);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(294, 128);
+            this.label6.TabIndex = 39;
+            this.label6.Text = "Available operators are:\r\neq - Equals specified value:\r\ngt - Greater than specifi" +
+    "ed value\r\nlt - Less than specified value\r\ncontains - Contains specified value\r\ns" +
+    "tartswit - Starts with specified value";
             // 
             // Form1
             // 
@@ -517,6 +533,8 @@
         private System.Windows.Forms.TabPage tabDbBasics;
         private System.Windows.Forms.TabPage tabLookup;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label label6;
     }
 }
 
