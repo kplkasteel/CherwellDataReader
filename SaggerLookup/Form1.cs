@@ -11,6 +11,7 @@ using SaggerLookup.Swagger.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -361,13 +362,23 @@ namespace SaggerLookup
                                 txtLookup.Text);
                         var schema =
                             CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(summary.BusObId);
-                         var searchResultsRequest = new SearchResultsRequest();
-                         searchResultsRequest.BusObId = summary.BusObId;
-                         searchResultsRequest.IncludeAllFields = true;
-                         searchResultsRequest.Filters = new List<FilterInfo>();
-                         searchResultsRequest.PageSize = 20000;
+                        var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
+                        var fieldList = list.Split(',');
 
-                         readResponses = CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
+                        var filterInfoList = (from filter in Filters let fieldId = schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId where !string.IsNullOrEmpty(fieldId) select new FilterInfo {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+
+                        var fields = fieldList.Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId).Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                        var searchResultsRequest = new SearchResultsRequest 
+                        {   
+                            BusObId = summary.BusObId,  
+                            IncludeAllFields = !fields.Any(),
+                            Fields = fields.Any() ? fields : null,
+                            Filters = filterInfoList,
+                            PageSize = 20000
+                        };
+
+                        readResponses = CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
 
                     },
                     _cancellationToken.Token);

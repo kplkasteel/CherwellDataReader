@@ -47,9 +47,7 @@
             this.txtObjectList = new System.Windows.Forms.TextBox();
             this.lblDownloadResult = new System.Windows.Forms.Label();
             this.lblObjectList = new System.Windows.Forms.Label();
-            this.lblBasics = new System.Windows.Forms.Label();
             this.txtLookup = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.txtFields = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -64,6 +62,13 @@
             this.txtFilterList = new System.Windows.Forms.TextBox();
             this.lblFilterList = new System.Windows.Forms.Label();
             this.btnGetLookup = new System.Windows.Forms.Button();
+            this.tabControl = new System.Windows.Forms.TabControl();
+            this.tabDbBasics = new System.Windows.Forms.TabPage();
+            this.tabLookup = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tabControl.SuspendLayout();
+            this.tabDbBasics.SuspendLayout();
+            this.tabLookup.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnLogin
@@ -71,7 +76,7 @@
             this.btnLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogin.Location = new System.Drawing.Point(344, 28);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(173, 126);
+            this.btnLogin.Size = new System.Drawing.Size(173, 110);
             this.btnLogin.TabIndex = 0;
             this.btnLogin.Text = "Login";
             this.btnLogin.UseVisualStyleBackColor = true;
@@ -151,7 +156,7 @@
             this.txtTokenResponse.Name = "txtTokenResponse";
             this.txtTokenResponse.ReadOnly = true;
             this.txtTokenResponse.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtTokenResponse.Size = new System.Drawing.Size(897, 154);
+            this.txtTokenResponse.Size = new System.Drawing.Size(823, 154);
             this.txtTokenResponse.TabIndex = 9;
             // 
             // progressBar
@@ -165,7 +170,7 @@
             // 
             // btnSummaries
             // 
-            this.btnSummaries.Location = new System.Drawing.Point(523, 205);
+            this.btnSummaries.Location = new System.Drawing.Point(6, 6);
             this.btnSummaries.Name = "btnSummaries";
             this.btnSummaries.Size = new System.Drawing.Size(173, 26);
             this.btnSummaries.TabIndex = 11;
@@ -175,16 +180,19 @@
             // 
             // txtResultBox
             // 
+            this.txtResultBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.txtResultBox.Location = new System.Drawing.Point(12, 205);
             this.txtResultBox.Multiline = true;
             this.txtResultBox.Name = "txtResultBox";
             this.txtResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResultBox.Size = new System.Drawing.Size(505, 730);
+            this.txtResultBox.Size = new System.Drawing.Size(505, 447);
             this.txtResultBox.TabIndex = 13;
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(12, 941);
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSave.Location = new System.Drawing.Point(12, 664);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(505, 41);
             this.btnSave.TabIndex = 14;
@@ -194,7 +202,7 @@
             // 
             // btnSchemas
             // 
-            this.btnSchemas.Location = new System.Drawing.Point(523, 236);
+            this.btnSchemas.Location = new System.Drawing.Point(6, 38);
             this.btnSchemas.Name = "btnSchemas";
             this.btnSchemas.Size = new System.Drawing.Size(173, 26);
             this.btnSchemas.TabIndex = 16;
@@ -204,7 +212,7 @@
             // 
             // btnTemplates
             // 
-            this.btnTemplates.Location = new System.Drawing.Point(523, 268);
+            this.btnTemplates.Location = new System.Drawing.Point(6, 70);
             this.btnTemplates.Name = "btnTemplates";
             this.btnTemplates.Size = new System.Drawing.Size(173, 26);
             this.btnTemplates.TabIndex = 17;
@@ -214,10 +222,13 @@
             // 
             // txtObjectList
             // 
-            this.txtObjectList.Location = new System.Drawing.Point(528, 317);
+            this.txtObjectList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtObjectList.Location = new System.Drawing.Point(188, 26);
             this.txtObjectList.Multiline = true;
             this.txtObjectList.Name = "txtObjectList";
-            this.txtObjectList.Size = new System.Drawing.Size(172, 618);
+            this.txtObjectList.Size = new System.Drawing.Size(621, 443);
             this.txtObjectList.TabIndex = 18;
             // 
             // lblDownloadResult
@@ -232,41 +243,23 @@
             // lblObjectList
             // 
             this.lblObjectList.AutoSize = true;
-            this.lblObjectList.Location = new System.Drawing.Point(523, 297);
+            this.lblObjectList.Location = new System.Drawing.Point(185, 6);
             this.lblObjectList.Name = "lblObjectList";
             this.lblObjectList.Size = new System.Drawing.Size(75, 17);
             this.lblObjectList.TabIndex = 20;
             this.lblObjectList.Text = "Object List";
             // 
-            // lblBasics
-            // 
-            this.lblBasics.AutoSize = true;
-            this.lblBasics.Location = new System.Drawing.Point(523, 185);
-            this.lblBasics.Name = "lblBasics";
-            this.lblBasics.Size = new System.Drawing.Size(72, 17);
-            this.lblBasics.TabIndex = 21;
-            this.lblBasics.Text = "DB Basics";
-            // 
             // txtLookup
             // 
-            this.txtLookup.Location = new System.Drawing.Point(706, 209);
+            this.txtLookup.Location = new System.Drawing.Point(15, 33);
             this.txtLookup.Name = "txtLookup";
-            this.txtLookup.Size = new System.Drawing.Size(170, 22);
+            this.txtLookup.Size = new System.Drawing.Size(199, 22);
             this.txtLookup.TabIndex = 22;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(703, 189);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(102, 17);
-            this.label1.TabIndex = 23;
-            this.label1.Text = "Lookup Tables";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(703, 234);
+            this.label2.Location = new System.Drawing.Point(12, 58);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(45, 17);
             this.label2.TabIndex = 24;
@@ -274,17 +267,17 @@
             // 
             // txtFields
             // 
-            this.txtFields.Location = new System.Drawing.Point(706, 254);
+            this.txtFields.Location = new System.Drawing.Point(15, 78);
             this.txtFields.Multiline = true;
             this.txtFields.Name = "txtFields";
             this.txtFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtFields.Size = new System.Drawing.Size(170, 189);
+            this.txtFields.Size = new System.Drawing.Size(199, 377);
             this.txtFields.TabIndex = 25;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(703, 642);
+            this.label3.Location = new System.Drawing.Point(222, 9);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(39, 17);
             this.label3.TabIndex = 26;
@@ -292,16 +285,16 @@
             // 
             // txtFieldName
             // 
-            this.txtFieldName.Location = new System.Drawing.Point(706, 710);
+            this.txtFieldName.Location = new System.Drawing.Point(225, 56);
             this.txtFieldName.Name = "txtFieldName";
-            this.txtFieldName.Size = new System.Drawing.Size(166, 22);
+            this.txtFieldName.Size = new System.Drawing.Size(259, 22);
             this.txtFieldName.TabIndex = 27;
             // 
             // btnAddFilter
             // 
-            this.btnAddFilter.Location = new System.Drawing.Point(706, 662);
+            this.btnAddFilter.Location = new System.Drawing.Point(225, 181);
             this.btnAddFilter.Name = "btnAddFilter";
-            this.btnAddFilter.Size = new System.Drawing.Size(166, 23);
+            this.btnAddFilter.Size = new System.Drawing.Size(259, 23);
             this.btnAddFilter.TabIndex = 28;
             this.btnAddFilter.Text = "Add Filter";
             this.btnAddFilter.UseVisualStyleBackColor = true;
@@ -309,9 +302,9 @@
             // 
             // btnClearFilter
             // 
-            this.btnClearFilter.Location = new System.Drawing.Point(706, 837);
+            this.btnClearFilter.Location = new System.Drawing.Point(490, 432);
             this.btnClearFilter.Name = "btnClearFilter";
-            this.btnClearFilter.Size = new System.Drawing.Size(166, 23);
+            this.btnClearFilter.Size = new System.Drawing.Size(319, 23);
             this.btnClearFilter.TabIndex = 29;
             this.btnClearFilter.Text = "Clear Filters";
             this.btnClearFilter.UseVisualStyleBackColor = true;
@@ -320,7 +313,7 @@
             // FieldName
             // 
             this.FieldName.AutoSize = true;
-            this.FieldName.Location = new System.Drawing.Point(706, 688);
+            this.FieldName.Location = new System.Drawing.Point(222, 36);
             this.FieldName.Name = "FieldName";
             this.FieldName.Size = new System.Drawing.Size(79, 17);
             this.FieldName.TabIndex = 30;
@@ -329,7 +322,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(706, 735);
+            this.label4.Location = new System.Drawing.Point(222, 81);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 17);
             this.label4.TabIndex = 32;
@@ -337,15 +330,15 @@
             // 
             // txtOperator
             // 
-            this.txtOperator.Location = new System.Drawing.Point(706, 757);
+            this.txtOperator.Location = new System.Drawing.Point(225, 105);
             this.txtOperator.Name = "txtOperator";
-            this.txtOperator.Size = new System.Drawing.Size(166, 22);
+            this.txtOperator.Size = new System.Drawing.Size(259, 22);
             this.txtOperator.TabIndex = 31;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(703, 782);
+            this.label5.Location = new System.Drawing.Point(222, 130);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(44, 17);
             this.label5.TabIndex = 34;
@@ -353,24 +346,24 @@
             // 
             // txtValue
             // 
-            this.txtValue.Location = new System.Drawing.Point(706, 809);
+            this.txtValue.Location = new System.Drawing.Point(225, 153);
             this.txtValue.Name = "txtValue";
-            this.txtValue.Size = new System.Drawing.Size(166, 22);
+            this.txtValue.Size = new System.Drawing.Size(259, 22);
             this.txtValue.TabIndex = 33;
             // 
             // txtFilterList
             // 
-            this.txtFilterList.Location = new System.Drawing.Point(706, 466);
+            this.txtFilterList.Location = new System.Drawing.Point(490, 29);
             this.txtFilterList.Multiline = true;
             this.txtFilterList.Name = "txtFilterList";
             this.txtFilterList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtFilterList.Size = new System.Drawing.Size(170, 173);
+            this.txtFilterList.Size = new System.Drawing.Size(319, 397);
             this.txtFilterList.TabIndex = 36;
             // 
             // lblFilterList
             // 
             this.lblFilterList.AutoSize = true;
-            this.lblFilterList.Location = new System.Drawing.Point(703, 446);
+            this.lblFilterList.Location = new System.Drawing.Point(487, 9);
             this.lblFilterList.Name = "lblFilterList";
             this.lblFilterList.Size = new System.Drawing.Size(56, 17);
             this.lblFilterList.TabIndex = 35;
@@ -378,44 +371,86 @@
             // 
             // btnGetLookup
             // 
-            this.btnGetLookup.Location = new System.Drawing.Point(705, 866);
+            this.btnGetLookup.Location = new System.Drawing.Point(225, 386);
             this.btnGetLookup.Name = "btnGetLookup";
-            this.btnGetLookup.Size = new System.Drawing.Size(166, 69);
+            this.btnGetLookup.Size = new System.Drawing.Size(259, 69);
             this.btnGetLookup.TabIndex = 37;
             this.btnGetLookup.Text = "Get Objects";
             this.btnGetLookup.UseVisualStyleBackColor = true;
             this.btnGetLookup.Click += new System.EventHandler(this.btnGetLookup_Click);
             // 
+            // tabControl
+            // 
+            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl.Controls.Add(this.tabDbBasics);
+            this.tabControl.Controls.Add(this.tabLookup);
+            this.tabControl.Location = new System.Drawing.Point(523, 205);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(823, 504);
+            this.tabControl.TabIndex = 38;
+            // 
+            // tabDbBasics
+            // 
+            this.tabDbBasics.Controls.Add(this.btnTemplates);
+            this.tabDbBasics.Controls.Add(this.btnSummaries);
+            this.tabDbBasics.Controls.Add(this.btnSchemas);
+            this.tabDbBasics.Controls.Add(this.txtObjectList);
+            this.tabDbBasics.Controls.Add(this.lblObjectList);
+            this.tabDbBasics.Location = new System.Drawing.Point(4, 25);
+            this.tabDbBasics.Name = "tabDbBasics";
+            this.tabDbBasics.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDbBasics.Size = new System.Drawing.Size(815, 475);
+            this.tabDbBasics.TabIndex = 0;
+            this.tabDbBasics.Text = "Db basics";
+            this.tabDbBasics.UseVisualStyleBackColor = true;
+            // 
+            // tabLookup
+            // 
+            this.tabLookup.Controls.Add(this.label1);
+            this.tabLookup.Controls.Add(this.txtFields);
+            this.tabLookup.Controls.Add(this.btnGetLookup);
+            this.tabLookup.Controls.Add(this.txtLookup);
+            this.tabLookup.Controls.Add(this.label5);
+            this.tabLookup.Controls.Add(this.lblFilterList);
+            this.tabLookup.Controls.Add(this.label4);
+            this.tabLookup.Controls.Add(this.txtFilterList);
+            this.tabLookup.Controls.Add(this.FieldName);
+            this.tabLookup.Controls.Add(this.txtFieldName);
+            this.tabLookup.Controls.Add(this.label3);
+            this.tabLookup.Controls.Add(this.btnAddFilter);
+            this.tabLookup.Controls.Add(this.btnClearFilter);
+            this.tabLookup.Controls.Add(this.txtValue);
+            this.tabLookup.Controls.Add(this.label2);
+            this.tabLookup.Controls.Add(this.txtOperator);
+            this.tabLookup.Location = new System.Drawing.Point(4, 25);
+            this.tabLookup.Name = "tabLookup";
+            this.tabLookup.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLookup.Size = new System.Drawing.Size(815, 475);
+            this.tabLookup.TabIndex = 1;
+            this.tabLookup.Text = "Lookup Tables";
+            this.tabLookup.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(44, 17);
+            this.label1.TabIndex = 38;
+            this.label1.Text = "Tabel";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1432, 987);
-            this.Controls.Add(this.btnGetLookup);
-            this.Controls.Add(this.txtFilterList);
-            this.Controls.Add(this.lblFilterList);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.txtValue);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.txtOperator);
-            this.Controls.Add(this.FieldName);
-            this.Controls.Add(this.btnClearFilter);
-            this.Controls.Add(this.btnAddFilter);
-            this.Controls.Add(this.txtFieldName);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.txtFields);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.txtLookup);
-            this.Controls.Add(this.lblBasics);
-            this.Controls.Add(this.lblObjectList);
+            this.ClientSize = new System.Drawing.Size(1358, 721);
+            this.Controls.Add(this.tabControl);
             this.Controls.Add(this.lblDownloadResult);
-            this.Controls.Add(this.txtObjectList);
-            this.Controls.Add(this.btnTemplates);
-            this.Controls.Add(this.btnSchemas);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.txtResultBox);
-            this.Controls.Add(this.btnSummaries);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.txtTokenResponse);
             this.Controls.Add(this.lblPassword);
@@ -427,9 +462,16 @@
             this.Controls.Add(this.lblEndPoint);
             this.Controls.Add(this.txtEndPoint);
             this.Controls.Add(this.btnLogin);
+            this.MaximumSize = new System.Drawing.Size(1376, 768);
+            this.MinimumSize = new System.Drawing.Size(1376, 768);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.tabControl.ResumeLayout(false);
+            this.tabDbBasics.ResumeLayout(false);
+            this.tabDbBasics.PerformLayout();
+            this.tabLookup.ResumeLayout(false);
+            this.tabLookup.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -456,9 +498,7 @@
         private System.Windows.Forms.TextBox txtObjectList;
         private System.Windows.Forms.Label lblDownloadResult;
         private System.Windows.Forms.Label lblObjectList;
-        private System.Windows.Forms.Label lblBasics;
         private System.Windows.Forms.TextBox txtLookup;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtFields;
         private System.Windows.Forms.Label label3;
@@ -473,6 +513,10 @@
         private System.Windows.Forms.TextBox txtFilterList;
         private System.Windows.Forms.Label lblFilterList;
         private System.Windows.Forms.Button btnGetLookup;
+        private System.Windows.Forms.TabControl tabControl;
+        private System.Windows.Forms.TabPage tabDbBasics;
+        private System.Windows.Forms.TabPage tabLookup;
+        private System.Windows.Forms.Label label1;
     }
 }
 
