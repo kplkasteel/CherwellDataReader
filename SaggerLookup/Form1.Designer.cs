@@ -67,11 +67,18 @@
             this.tabDbBasics = new System.Windows.Forms.TabPage();
             this.tabLookup = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label6 = new System.Windows.Forms.Label();
+            this.tabUsers = new System.Windows.Forms.TabPage();
+            this.chkStoreIndiviual = new System.Windows.Forms.CheckBox();
+            this.txtUserFields = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.btnGetUsers = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.tabControl.SuspendLayout();
             this.tabDbBasics.SuspendLayout();
             this.tabLookup.SuspendLayout();
+            this.tabUsers.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnLogin
@@ -390,6 +397,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl.Controls.Add(this.tabDbBasics);
             this.tabControl.Controls.Add(this.tabLookup);
+            this.tabControl.Controls.Add(this.tabUsers);
             this.tabControl.Location = new System.Drawing.Point(523, 205);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
@@ -452,11 +460,63 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(225, 211);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(294, 128);
+            this.label6.Size = new System.Drawing.Size(235, 102);
             this.label6.TabIndex = 39;
             this.label6.Text = "Available operators are:\r\neq - Equals specified value:\r\ngt - Greater than specifi" +
     "ed value\r\nlt - Less than specified value\r\ncontains - Contains specified value\r\ns" +
     "tartswit - Starts with specified value";
+            // 
+            // tabUsers
+            // 
+            this.tabUsers.Controls.Add(this.chkStoreIndiviual);
+            this.tabUsers.Controls.Add(this.txtUserFields);
+            this.tabUsers.Controls.Add(this.label7);
+            this.tabUsers.Controls.Add(this.btnGetUsers);
+            this.tabUsers.Location = new System.Drawing.Point(4, 25);
+            this.tabUsers.Name = "tabUsers";
+            this.tabUsers.Padding = new System.Windows.Forms.Padding(3);
+            this.tabUsers.Size = new System.Drawing.Size(815, 475);
+            this.tabUsers.TabIndex = 2;
+            this.tabUsers.Text = "Users";
+            this.tabUsers.UseVisualStyleBackColor = true;
+            // 
+            // chkStoreIndiviual
+            // 
+            this.chkStoreIndiviual.AutoSize = true;
+            this.chkStoreIndiviual.Location = new System.Drawing.Point(236, 23);
+            this.chkStoreIndiviual.Name = "chkStoreIndiviual";
+            this.chkStoreIndiviual.Size = new System.Drawing.Size(186, 21);
+            this.chkStoreIndiviual.TabIndex = 28;
+            this.chkStoreIndiviual.Text = "Store as indivilual Items?";
+            this.chkStoreIndiviual.UseVisualStyleBackColor = true;
+            // 
+            // txtUserFields
+            // 
+            this.txtUserFields.Location = new System.Drawing.Point(7, 23);
+            this.txtUserFields.Multiline = true;
+            this.txtUserFields.Name = "txtUserFields";
+            this.txtUserFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtUserFields.Size = new System.Drawing.Size(222, 446);
+            this.txtUserFields.TabIndex = 27;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 3);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(45, 17);
+            this.label7.TabIndex = 26;
+            this.label7.Text = "Fields";
+            // 
+            // btnGetUsers
+            // 
+            this.btnGetUsers.Location = new System.Drawing.Point(658, 21);
+            this.btnGetUsers.Name = "btnGetUsers";
+            this.btnGetUsers.Size = new System.Drawing.Size(151, 23);
+            this.btnGetUsers.TabIndex = 0;
+            this.btnGetUsers.Text = "Get Users";
+            this.btnGetUsers.UseVisualStyleBackColor = true;
+            this.btnGetUsers.Click += new System.EventHandler(this.btnGetUsers_Click);
             // 
             // Form1
             // 
@@ -488,6 +548,8 @@
             this.tabDbBasics.PerformLayout();
             this.tabLookup.ResumeLayout(false);
             this.tabLookup.PerformLayout();
+            this.tabUsers.ResumeLayout(false);
+            this.tabUsers.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -535,6 +597,12 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TabPage tabUsers;
+        private System.Windows.Forms.Button btnGetUsers;
+        private System.Windows.Forms.CheckBox chkStoreIndiviual;
+        private System.Windows.Forms.TextBox txtUserFields;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
     }
 }
 

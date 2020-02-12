@@ -22,6 +22,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name="busObRecId", EmitDefaultValue=false), PrimaryKey]
         public string BusObRecId { get; set; }
 
+        
         public string FieldString
         {
             get => _fields != null ? JsonConvert.SerializeObject(_fields) : string.Empty;

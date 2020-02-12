@@ -9,12 +9,14 @@ using SaggerLookup.Swagger.Api;
 using SaggerLookup.Swagger.Model;
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls.WebParts;
 using System.Windows.Forms;
 
 namespace SaggerLookup
@@ -394,6 +396,127 @@ namespace SaggerLookup
                     txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
+                            .ToString(Formatting.Indented);
+                    });
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                progressBar.Invoke((MethodInvoker)delegate
+                {
+                    progressBar.MarqueeAnimationSpeed = 0;
+                    progressBar.Refresh();
+                });
+            }
+        }
+
+        private async void btnGetUsers_Click(object sender, EventArgs e)
+        {
+            if (StaticData.ActiveToken == null) return;
+
+            progressBar.MarqueeAnimationSpeed = 1;
+            if (chkStoreIndiviual.Checked)
+            {
+                folderBrowserDialog1.ShowDialog();
+             
+            }
+            
+            var users = new List<UserInfo>();
+
+            try
+            {
+                _cancellationToken = new CancellationTokenSource();
+
+                var task = Task.Run(
+                    () =>
+                    {
+                        var summary =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1("UserInfo");
+                        var schema =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(summary.BusObId);
+                        var list = txtUserFields.Text.Replace("\n", "").Replace("\r", "");
+                        var fieldList = list.Split(',');
+
+                        var fieldIds = fieldList.Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId).Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                        var searchResultRequest = new SearchResultsRequest
+                        {
+                            BusObId = summary.BusObId,
+                            Filters = new List<FilterInfo>(),
+                            PageSize = 20000,
+                            IncludeAllFields = false
+                        };
+
+                        var searchResponse =
+                            CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest);
+
+                        foreach (var readResponse in searchResponse.BusinessObjects)
+                        {
+                            var filterInfo = new FilterInfo
+                            {
+                                FieldId = schema.FirstRecIdField, Operator = "eq", Value = readResponse.BusObRecId
+                            };
+                            searchResultRequest.BusObId = readResponse.BusObId;
+                            searchResultRequest.Filters = new List<FilterInfo>{ filterInfo };
+                            searchResultRequest.IncludeAllFields = !fieldIds.Any(); 
+                            searchResultRequest.PageSize = 20000;
+                            searchResultRequest.Fields = fieldIds.Any() ? fieldIds : null;
+
+                            var item = CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest).BusinessObjects.SingleOrDefault(x=>x.BusObRecId == readResponse.BusObRecId);
+                            if (item == null) continue;
+
+                            byte[] avatarBytes = null;
+                            if(!string.IsNullOrEmpty(item.ReadFieldInformation("Avatar")))
+                            {
+                                avatarBytes =
+                                    CherwellCoreApi.Instance.CoreGetGalleryImageV1(item.ReadFieldInformation("Avatar"),
+                                        null, null);
+                            }
+
+                            var teams = CherwellTeamsApi.Instance.TeamsGetUsersTeamsV2(item.BusObRecId);
+
+
+                            var info = new UserInfo
+                            {
+                                BusObId = readResponse.BusObRecId,
+                                BusObPublicId = readResponse.BusObPublicId,
+                                BusObRecId = readResponse.BusObRecId,
+                                FirstName = readResponse.ReadFieldInformation(nameof(UserInfo.FirstName)),
+                                FullName = readResponse.ReadFieldInformation(nameof(UserInfo.FullName)),
+                                LastName = readResponse.ReadFieldInformation(nameof(UserInfo.LastName)),
+                                Phone = readResponse.ReadFieldInformation(nameof(UserInfo.Phone)),
+                                Email = readResponse.ReadFieldInformation(nameof(UserInfo.Email)),
+                                DefaultTeamID = readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamID)),
+                                DefaultTeamName = readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamName)),
+                                Avatar = readResponse.ReadFieldInformation(nameof(UserInfo.Avatar)),
+                                AvatarBytes = avatarBytes,
+                                Teams = teams.Teams,
+                                LastModifiedDateTime =
+                                    readResponse.ReadFieldInformation(nameof(UserInfo.LastModifiedDateTime))
+                            };
+
+                            users.Add(info);
+                            if (!chkStoreIndiviual.Checked) continue;
+                            if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
+                            using (var file =
+                                File.CreateText(Path.Combine(folderBrowserDialog1.SelectedPath, info.BusObRecId + ".json")))
+                            {
+                                var serializer = new JsonSerializer();
+                                serializer.Serialize(file, info);
+                            }
+                        }
+                    },
+                    _cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    saveFile = (object)users;
+                    txtResultBox.Invoke((MethodInvoker)delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(users))
                             .ToString(Formatting.Indented);
                     });
                 }
