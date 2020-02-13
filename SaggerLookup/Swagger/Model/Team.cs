@@ -14,6 +14,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name="teamName", EmitDefaultValue=false)]
         public string TeamName { get; set; }
 
+        [DataMember(Name = "type", EmitDefaultValue = false)]
         public string Type { get; set; }
 
     }

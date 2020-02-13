@@ -534,6 +534,65 @@ namespace SaggerLookup
                 });
             }
         }
+
+        private async void btnGetTeams_Click(object sender, EventArgs e)
+        {
+            if (StaticData.ActiveToken == null) return;
+
+            progressBar.MarqueeAnimationSpeed = 1;
+            
+            _cancellationToken = new CancellationTokenSource();
+            var teams = new List<Team>();
+            try
+            {
+                var task = Task.Run(
+                    () =>
+                    {
+
+                        teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
+
+
+                        foreach (var team in teams)
+                        {
+                            team.Type = TeamType.Team.ToString();
+
+                        }
+                        var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
+
+                        foreach (var workgroup in workGroups)
+                        {
+                            workgroup.Type = TeamType.WorkGroup.ToString();
+
+                        }
+                        teams.AddRange(workGroups);
+
+
+                    },
+                    _cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    saveFile = (object)teams;
+                    txtResultBox.Invoke((MethodInvoker)delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
+                            .ToString(Formatting.Indented);
+                    });
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                progressBar.Invoke((MethodInvoker)delegate
+                {
+                    progressBar.MarqueeAnimationSpeed = 0;
+                    progressBar.Refresh();
+                });
+            }
+            
+        }
     }
 
     public class Filters

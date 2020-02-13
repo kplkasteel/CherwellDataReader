@@ -91,6 +91,7 @@
     <Compile Include="Enum\AuthModes.cs" />
     <Compile Include="Enum\GrantTypes.cs" />
     <Compile Include="Enum\ServiceTokenStatus.cs" />
+    <Compile Include="Enum\TeamType.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
