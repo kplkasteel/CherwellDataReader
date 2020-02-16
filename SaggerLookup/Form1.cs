@@ -9,25 +9,22 @@ using SaggerLookup.Swagger.Api;
 using SaggerLookup.Swagger.Model;
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls.WebParts;
 using System.Windows.Forms;
 
 namespace SaggerLookup
 {
     public partial class Form1 : Form
     {
-        private CancellationTokenSource _cancellationToken;
 
-        private object saveFile;
+        private object _saveFile;
 
-        private List<Filters> Filters = new List<Filters>();
+        private List<Filters> _filters = new List<Filters>();
 
         public Form1()
         {
@@ -79,34 +76,37 @@ namespace SaggerLookup
             CherwellServiceApi.Instance.ServiceApi = new ServiceApi(CherwellServiceApi.Instance.EndPoint);
             progressBar.MarqueeAnimationSpeed = 1;
             var result = false;
-            try
+            try 
             {
-                _cancellationToken = new CancellationTokenSource();
-                var task = Task.Run(
-                    () =>
-                    {
-                        StaticData.ActiveToken =
-                            CherwellServiceApi.Instance.GetServiceToken(true);
-                    },
-                    _cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using (var cancellationToken = new CancellationTokenSource())
                 {
-                    if (StaticData.ActiveToken != null)
+                    var task = Task.Run(
+                        () =>
+                        {
+                            StaticData.ActiveToken =
+                                CherwellServiceApi.Instance.GetServiceToken(true);
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                     {
-                        var tokenInfo = new StringBuilder();
-                        tokenInfo.AppendLine(StaticData.ActiveToken.TokenType + " " + StaticData.ActiveToken.AccessToken);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.AsclientId);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.Expires + " " + StaticData.ActiveToken.ExpiresIn);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.Issued);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.RefreshToken);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.Username);
-                        result = true;
-                        txtTokenResponse.Invoke((MethodInvoker)delegate
-                       {
-                           txtTokenResponse.Text = tokenInfo.ToString();
-                       });
+                        if (StaticData.ActiveToken != null)
+                        {
+                            var tokenInfo = new StringBuilder();
+                            tokenInfo.AppendLine(StaticData.ActiveToken.TokenType + " " + StaticData.ActiveToken.AccessToken);
+                            tokenInfo.AppendLine(StaticData.ActiveToken.AsclientId);
+                            tokenInfo.AppendLine(StaticData.ActiveToken.Expires + " " + StaticData.ActiveToken.ExpiresIn);
+                            tokenInfo.AppendLine(StaticData.ActiveToken.Issued);
+                            tokenInfo.AppendLine(StaticData.ActiveToken.RefreshToken);
+                            tokenInfo.AppendLine(StaticData.ActiveToken.Username);
+                            result = true;
+                            txtTokenResponse.Invoke((MethodInvoker)delegate
+                            {
+                                txtTokenResponse.Text = tokenInfo.ToString();
+                            });
+                        }
                     }
                 }
+                
             }
             catch (Exception exception)
             {
@@ -147,31 +147,34 @@ namespace SaggerLookup
             var summaryList = new List<Summary>();
             try
             {
-                _cancellationToken = new CancellationTokenSource();
-
-                var task = Task.Run(
-                    () =>
-                    {
-                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                        var objectList = list.Split(',');
-
-                        foreach (var item in objectList)
-                        {
-                            var summary = CherwellBusinessObjectApi.Instance
-                                .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
-                            if (summary != null) summaryList.Add(summary);
-                        }
-                    },
-                    _cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using (var cancellationToken = new CancellationTokenSource())
                 {
-                    saveFile = (object)summaryList;
-                    txtResultBox.Invoke((MethodInvoker)delegate
-                   {
-                       txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(summaryList))
-                           .ToString(Formatting.Indented);
-                   });
+                    var task = Task.Run(
+                        () =>
+                        {
+                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                            var objectList = list.Split(',');
+
+                            foreach (var item in objectList)
+                            {
+                                var summary = CherwellBusinessObjectApi.Instance
+                                    .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
+                                if (summary != null) summaryList.Add(summary);
+                            }
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                    {
+                        _saveFile = (object)summaryList;
+                        txtResultBox.Invoke((MethodInvoker)delegate
+                        {
+                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(summaryList))
+                                .ToString(Formatting.Indented);
+                        });
+                    }
                 }
+
+                
             }
             catch (Exception exception)
             {
@@ -189,7 +192,7 @@ namespace SaggerLookup
 
         private void Save_Click(object sender, EventArgs e)
         {
-            if (saveFile == null) return;
+            if (_saveFile == null) return;
             var saveFileDialog1 = new SaveFileDialog { Filter = "JSON File | *.json", Title = "Save an json File" };
             saveFileDialog1.ShowDialog();
 
@@ -198,55 +201,58 @@ namespace SaggerLookup
                 File.CreateText(saveFileDialog1.FileName))
             {
                 var serializer = new JsonSerializer();
-                serializer.Serialize(file, saveFile);
+                serializer.Serialize(file, _saveFile);
             }
-            saveFile = null;
+            _saveFile = null;
         }
 
-        private async void btnSchemas_Click(object sender, EventArgs e)
+        private async void BtnSchemas_Click(object sender, EventArgs e)
         {
             if (StaticData.ActiveToken == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var schemaResponses = new List<SchemaResponse>();
             try
             {
-                _cancellationToken = new CancellationTokenSource();
-
-                var task = Task.Run(
-                    () =>
-                    {
-                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                        var objectList = list.Split(',');
-
-                        foreach (var item in objectList)
-                        {
-                            var summary = CherwellBusinessObjectApi.Instance
-                                .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
-                            if (summary == null) continue;
-                            var schema =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                    summary.BusObId);
-                            schemaResponses.Add(schema);
-                            if (summary.Group == null || (bool)summary.Group) continue;
-                            foreach (var groupSummary in summary.GroupSummaries)
-                            {
-                                schema =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                        groupSummary.BusObId);
-                                schemaResponses.Add(schema);
-                            }
-                        }
-                    },
-                    _cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using (var cancellationToken = new CancellationTokenSource())
                 {
-                    saveFile = (object)schemaResponses;
-                    txtResultBox.Invoke((MethodInvoker)delegate
+                    var task = Task.Run(
+                        () =>
+                        {
+                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                            var objectList = list.Split(',');
+
+                            foreach (var item in objectList)
+                            {
+                                var summary = CherwellBusinessObjectApi.Instance
+                                    .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
+                                if (summary == null) continue;
+                                var schema =
+                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                        summary.BusObId);
+                                schemaResponses.Add(schema);
+                                if (summary.Group == null || (bool)summary.Group) continue;
+                                foreach (var groupSummary in summary.GroupSummaries)
+                                {
+                                    schema =
+                                        CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                            groupSummary.BusObId);
+                                    schemaResponses.Add(schema);
+                                }
+                            }
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(schemaResponses))
-                            .ToString(Formatting.Indented);
-                    });
+                        _saveFile = (object)schemaResponses;
+                        txtResultBox.Invoke((MethodInvoker)delegate
+                        {
+                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(schemaResponses))
+                                .ToString(Formatting.Indented);
+                        });
+                    }
                 }
+
+               
             }
             catch (Exception exception)
             {
@@ -262,16 +268,16 @@ namespace SaggerLookup
             }
         }
 
-        private async void btnTemplates_Click(object sender, EventArgs e)
+        private async void BtnTemplates_Click(object sender, EventArgs e)
         {
             if (StaticData.ActiveToken == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var templateResponses = new List<TemplateResponse>();
             try
             {
-                _cancellationToken = new CancellationTokenSource();
-
-                var task = Task.Run(
+                using (var cancellationToken = new CancellationTokenSource())
+                {
+                      var task = Task.Run(
                     () =>
                     {
                         var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
@@ -309,16 +315,19 @@ namespace SaggerLookup
                             }
                         }
                     },
-                    _cancellationToken.Token);
+                    cancellationToken.Token);
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
-                    saveFile = (object)templateResponses;
+                    _saveFile = (object)templateResponses;
                     txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(templateResponses))
                             .ToString(Formatting.Indented);
                     });
                 }
+                }
+
+              
             }
             catch (Exception exception)
             {
@@ -336,10 +345,10 @@ namespace SaggerLookup
 
         private void btnAddFilter_Click(object sender, EventArgs e)
         {
-            Filters.Add(new Filters{Field = txtFieldName.Text, Operator = txtOperator.Text, Value = txtValue.Text});
+            _filters.Add(new Filters{Field = txtFieldName.Text, Operator = txtOperator.Text, Value = txtValue.Text});
             txtResultBox.Invoke((MethodInvoker)delegate
             {
-                txtFilterList.Text = JToken.Parse(JsonConvert.SerializeObject(Filters))
+                txtFilterList.Text = JToken.Parse(JsonConvert.SerializeObject(_filters))
                     .ToString(Formatting.Indented);
             });
 
@@ -347,7 +356,7 @@ namespace SaggerLookup
 
         private void btnClearFilter_Click(object sender, EventArgs e)
         {
-            Filters = new List<Filters>();
+            _filters = new List<Filters>();
             txtFilterList.Text = string.Empty;
         }
 
@@ -357,47 +366,57 @@ namespace SaggerLookup
             if(string.IsNullOrEmpty(txtLookup.Text)) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var readResponses = new List<ReadResponse>();
-           
+
             try
             {
-                _cancellationToken = new CancellationTokenSource();
-
-                var task = Task.Run(
-                    () =>
-                    {
-                        var summary =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                txtLookup.Text);
-                        var schema =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(summary.BusObId);
-                        var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
-                        var fieldList = list.Split(',');
-
-                        var filterInfoList = (from filter in Filters let fieldId = schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId where !string.IsNullOrEmpty(fieldId) select new FilterInfo {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
-
-                        var fields = fieldList.Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId).Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
-
-                        var searchResultsRequest = new SearchResultsRequest 
-                        {   
-                            BusObId = summary.BusObId,  
-                            IncludeAllFields = !fields.Any(),
-                            Fields = fields.Any() ? fields : null,
-                            Filters = filterInfoList,
-                            PageSize = 20000
-                        };
-
-                        readResponses = CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
-
-                    },
-                    _cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using (var cancellationToken = new CancellationTokenSource())
                 {
-                    saveFile = (object)readResponses;
-                    txtResultBox.Invoke((MethodInvoker)delegate
+                    var task = Task.Run(
+                        () =>
+                        {
+                            var summary =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                    txtLookup.Text);
+                            var schema =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                    summary.BusObId);
+                            var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
+                            var fieldList = list.Split(',');
+
+                            var filterInfoList = (from filter in _filters
+                                let fieldId =
+                                    schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
+                                where !string.IsNullOrEmpty(fieldId)
+                                select new FilterInfo
+                                    {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+
+                            var fields = fieldList
+                                .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
+                                .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                            var searchResultsRequest = new SearchResultsRequest
+                            {
+                                BusObId = summary.BusObId,
+                                IncludeAllFields = !fields.Any(),
+                                Fields = fields.Any() ? fields : null,
+                                Filters = filterInfoList,
+                                PageSize = 20000
+                            };
+
+                            readResponses = CherwellSearchesApi.Instance
+                                .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
+
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
-                            .ToString(Formatting.Indented);
-                    });
+                        _saveFile = (object) readResponses;
+                        txtResultBox.Invoke((MethodInvoker) delegate
+                        {
+                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
+                                .ToString(Formatting.Indented);
+                        });
+                    }
                 }
             }
             catch (Exception exception)
@@ -406,15 +425,16 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker)delegate
+                progressBar.Invoke((MethodInvoker) delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
                 });
             }
+
         }
 
-        private async void btnGetUsers_Click(object sender, EventArgs e)
+        private async void BtnGetUsers_Click(object sender, EventArgs e)
         {
             if (StaticData.ActiveToken == null) return;
 
@@ -429,9 +449,9 @@ namespace SaggerLookup
 
             try
             {
-                _cancellationToken = new CancellationTokenSource();
-
-                var task = Task.Run(
+                using (var cancellationToken = new CancellationTokenSource())
+                {
+                    var task = Task.Run(
                     () =>
                     {
                         var summary =
@@ -510,16 +530,21 @@ namespace SaggerLookup
                             }
                         }
                     },
-                    _cancellationToken.Token);
+                    cancellationToken.Token);
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
-                    saveFile = (object)users;
+                    _saveFile = (object)users;
                     txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(users))
                             .ToString(Formatting.Indented);
                     });
                 }
+                    
+                }
+                
+
+                
             }
             catch (Exception exception)
             {
@@ -541,42 +566,41 @@ namespace SaggerLookup
 
             progressBar.MarqueeAnimationSpeed = 1;
             
-            _cancellationToken = new CancellationTokenSource();
             var teams = new List<Team>();
             try
             {
-                var task = Task.Run(
-                    () =>
-                    {
-
-                        teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
-
-
-                        foreach (var team in teams)
-                        {
-                            team.Type = TeamType.Team.ToString();
-
-                        }
-                        var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
-
-                        foreach (var workgroup in workGroups)
-                        {
-                            workgroup.Type = TeamType.WorkGroup.ToString();
-
-                        }
-                        teams.AddRange(workGroups);
-
-
-                    },
-                    _cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using (var cancellationToken = new CancellationTokenSource())
                 {
-                    saveFile = (object)teams;
-                    txtResultBox.Invoke((MethodInvoker)delegate
+                    var task = Task.Run(
+                        () =>
+                        {
+                            teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
+
+
+                            foreach (var team in teams)
+                            {
+                                team.Type = TeamType.Team.ToString();
+                            }
+
+                            var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
+
+                            foreach (var workgroup in workGroups)
+                            {
+                                workgroup.Type = TeamType.WorkGroup.ToString();
+                            }
+
+                            teams.AddRange(workGroups);
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
-                            .ToString(Formatting.Indented);
-                    });
+                        _saveFile = (object)teams;
+                        txtResultBox.Invoke((MethodInvoker)delegate
+                        {
+                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
+                                .ToString(Formatting.Indented);
+                        });
+                    }
                 }
             }
             catch (Exception exception)
@@ -592,6 +616,11 @@ namespace SaggerLookup
                 });
             }
             
+        }
+
+        private void tabCustomers_Click(object sender, EventArgs e)
+        {
+            throw new System.NotImplementedException();
         }
     }
 
