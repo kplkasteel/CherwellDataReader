@@ -140,7 +140,6 @@
     <Compile Include="Swagger\Model\ManagerData.cs" />
     <Compile Include="Swagger\Model\ManagerFolder.cs" />
     <Compile Include="Swagger\Model\ManagerItem.cs" />
-    <Compile Include="Swagger\Model\NameValuePair.cs" />
     <Compile Include="Swagger\Model\NotificationTrigger.cs" />
     <Compile Include="Swagger\Model\OneStepActionRequest.cs" />
     <Compile Include="Swagger\Model\OneStepActionResponse.cs" />

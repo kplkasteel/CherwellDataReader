@@ -832,7 +832,18 @@ namespace SaggerLookup
                         {
                             var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
                             var objectList = list.Split(',');
-                            searchFolders.AddRange(from association in objectList select CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(association) into summary select CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(summary.BusObId) into search select search.Root);
+                            foreach (var association in objectList)
+                            {
+                                var summary =
+                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                        association);
+                                if (summary == null) continue;
+
+                                var searchFolder =
+                                    CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(
+                                        summary.BusObId);
+                                searchFolders.Add(searchFolder.Root);
+                            }
                         },
                         cancellationToken.Token);
                     if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
@@ -875,7 +886,18 @@ namespace SaggerLookup
                         {
                             var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
                             var objectList = list.Split(',');
-                            oneStepFolders.AddRange(from association in objectList select CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(association) into summary select CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId) into oneSteps select oneSteps.Root);
+                            foreach (var association in objectList)
+                            {
+                                var summary =
+                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                        association);
+                                if (summary == null) continue;
+                                var oneSteps =
+                                    CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId);
+                                if (oneSteps == null) continue;
+                            
+                                oneStepFolders.Add(oneSteps.Root);
+                            }
                         },
                         cancellationToken.Token);
                     if (await Task.WhenAny(task).ConfigureAwait(false) != task) return; 

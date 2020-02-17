@@ -3,10 +3,9 @@ using System.Runtime.Serialization;
 
 namespace SaggerLookup.Swagger.Model
 {
-
+  
     [DataContract]
-    
-    public  class SearchItemResponse 
+    public  class SearchItemResponse
     {
 
         [DataMember(Name="root", EmitDefaultValue=false)]

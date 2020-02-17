@@ -2,11 +2,9 @@ using System.Runtime.Serialization;
 
 namespace SaggerLookup.Swagger.Model
 {
-
     [DataContract]
-    public class SearchItem
-    {
-
+    public  class SearchItem
+    { 
         [DataMember(Name="association", EmitDefaultValue=false)]
         public string Association { get; set; }
 
@@ -27,7 +25,6 @@ namespace SaggerLookup.Swagger.Model
 
         [DataMember(Name="searchName", EmitDefaultValue=false)]
         public string SearchName { get; set; }
-
     }
 
 }

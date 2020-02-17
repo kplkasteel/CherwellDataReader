@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using RestSharp;
 
 namespace SaggerLookup.Swagger.Model
 {
