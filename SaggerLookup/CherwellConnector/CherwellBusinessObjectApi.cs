@@ -158,7 +158,7 @@ namespace SaggerLookup.CherwellConnector
             {
                 var result = _businessObjectApi
                     .BusinessObjectGetBusinessObjectSummaryByNameV1(busobname);
-                return result[0];
+                return result.Any() ? result[0] : null;
             }
             catch (ApiException apiException)
             {

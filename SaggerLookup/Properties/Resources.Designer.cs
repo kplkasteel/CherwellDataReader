@@ -19,7 +19,7 @@ namespace SaggerLookup.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -66,6 +66,78 @@ namespace SaggerLookup.Properties {
         internal static string Form1_btnGetTeams_Click_Error {
             get {
                 return ResourceManager.GetString("Form1_btnGetTeams_Click_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string Form1_BtnTemplates_Click_Error {
+            get {
+                return ResourceManager.GetString("Form1_BtnTemplates_Click_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login Error.
+        /// </summary>
+        internal static string Form1_Login_Click_Login_Error {
+            get {
+                return ResourceManager.GetString("Form1_Login_Click_Login_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing clientId.
+        /// </summary>
+        internal static string Form1_Login_Click_Missing_clientId {
+            get {
+                return ResourceManager.GetString("Form1_Login_Click_Missing_clientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing Endpoint.
+        /// </summary>
+        internal static string Form1_Login_Click_Missing_Endpoint {
+            get {
+                return ResourceManager.GetString("Form1_Login_Click_Missing_Endpoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing password.
+        /// </summary>
+        internal static string Form1_Login_Click_Missing_password {
+            get {
+                return ResourceManager.GetString("Form1_Login_Click_Missing_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing username.
+        /// </summary>
+        internal static string Form1_Login_Click_Missing_username {
+            get {
+                return ResourceManager.GetString("Form1_Login_Click_Missing_username", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to JSON File | *.json.
+        /// </summary>
+        internal static string Form1_Save_Click_JSON_File_____json {
+            get {
+                return ResourceManager.GetString("Form1_Save_Click_JSON_File_____json", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save an json File.
+        /// </summary>
+        internal static string Form1_Save_Click_Save_an_json_File {
+            get {
+                return ResourceManager.GetString("Form1_Save_Click_Save_an_json_File", resourceCulture);
             }
         }
     }

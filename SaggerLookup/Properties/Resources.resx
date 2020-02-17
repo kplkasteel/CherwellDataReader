@@ -117,4 +117,28 @@
   <data name="Form1_btnGetTeams_Click_Error" xml:space="preserve">
     <value>Error</value>
   </data>
+  <data name="Form1_Login_Click_Missing_clientId" xml:space="preserve">
+    <value>Missing clientId</value>
+  </data>
+  <data name="Form1_Login_Click_Login_Error" xml:space="preserve">
+    <value>Login Error</value>
+  </data>
+  <data name="Form1_Login_Click_Missing_Endpoint" xml:space="preserve">
+    <value>Missing Endpoint</value>
+  </data>
+  <data name="Form1_Login_Click_Missing_username" xml:space="preserve">
+    <value>Missing username</value>
+  </data>
+  <data name="Form1_Login_Click_Missing_password" xml:space="preserve">
+    <value>Missing password</value>
+  </data>
+  <data name="Form1_Save_Click_JSON_File_____json" xml:space="preserve">
+    <value>JSON File | *.json</value>
+  </data>
+  <data name="Form1_Save_Click_Save_an_json_File" xml:space="preserve">
+    <value>Save an json File</value>
+  </data>
+  <data name="Form1_BtnTemplates_Click_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
 </root>
