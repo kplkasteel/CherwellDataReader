@@ -818,7 +818,90 @@ namespace SaggerLookup
             }
         }
 
+        private async void btnSearches_Click(object sender, EventArgs e)
+        {
+            if (StaticData.ActiveToken == null) return;
+            progressBar.MarqueeAnimationSpeed = 1;
+            var searchFolders = new List<SearchFolder>();
+            try
+            {
+                using (var cancellationToken = new CancellationTokenSource())
+                {
+                    var task = Task.Run(
+                        () =>
+                        {
+                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                            var objectList = list.Split(',');
+                            searchFolders.AddRange(from association in objectList select CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(association) into summary select CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(summary.BusObId) into search select search.Root);
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
+                    _saveFile = searchFolders;
+                    txtResultBox.Invoke((MethodInvoker)delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(searchFolders))
+                            .ToString(Formatting.Indented);
+                    });
+                }
 
+
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, Resources.Form1_BtnTemplates_Click_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                progressBar.Invoke((MethodInvoker)delegate
+                {
+                    progressBar.MarqueeAnimationSpeed = 0;
+                    progressBar.Refresh();
+                });
+            }
+
+        }
+
+        private async void btnOneSteps_Click(object sender, EventArgs e)
+        {
+            if (StaticData.ActiveToken == null) return;
+            progressBar.MarqueeAnimationSpeed = 1;
+            var oneStepFolders = new List<ManagerFolder>();
+            try
+            {
+                using (var cancellationToken = new CancellationTokenSource())
+                {
+                    var task = Task.Run(
+                        () =>
+                        {
+                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                            var objectList = list.Split(',');
+                            oneStepFolders.AddRange(from association in objectList select CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(association) into summary select CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId) into oneSteps select oneSteps.Root);
+                        },
+                        cancellationToken.Token);
+                    if (await Task.WhenAny(task).ConfigureAwait(false) != task) return; 
+                    _saveFile = oneStepFolders;
+                    txtResultBox.Invoke((MethodInvoker)delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(oneStepFolders))
+                            .ToString(Formatting.Indented);
+                    });
+                }
+
+
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, Resources.Form1_BtnTemplates_Click_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                progressBar.Invoke((MethodInvoker)delegate
+                {
+                    progressBar.MarqueeAnimationSpeed = 0;
+                    progressBar.Refresh();
+                });
+            }
+        }
     }
 
     public class Filters
