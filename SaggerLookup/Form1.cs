@@ -663,6 +663,7 @@ namespace SaggerLookup
                     var task = Task.Run(
                         () =>
                         {
+                            lblCount.Invoke((MethodInvoker) delegate { lblCount.Text = string.Empty; });
                             var summary =
                                 CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                     "Customer");
@@ -773,6 +774,10 @@ namespace SaggerLookup
                                             Mobile = readResponse.ReadFieldInformation(nameof(Customer.Mobile))
                                         };
                                         customers.Add(customer);
+                                        lblCount.Invoke((MethodInvoker) delegate
+                                        {
+                                            lblCount.Text =
+                                                $"Downloaded Customer {customers.Count} out of {readResponses.Count}";});
                                         if (!chkStoreAsIndivilual.Checked) continue;
                                         if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
                                         using (var file =
@@ -793,11 +798,11 @@ namespace SaggerLookup
                     if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                     {
                         _saveFile = customers;
-                        txtResultBox.Invoke((MethodInvoker) delegate
-                        {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(customers))
-                                .ToString(Formatting.Indented);
-                        });
+                        //txtResultBox.Invoke((MethodInvoker) delegate
+                        //{
+                        //    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(customers))
+                        //        .ToString(Formatting.Indented);
+                        //});
                     }
                 }
             }

@@ -96,6 +96,7 @@
             this.txtObjectList = new System.Windows.Forms.TextBox();
             this.lblObjectList = new System.Windows.Forms.Label();
             this.tabbedPages = new System.Windows.Forms.TabControl();
+            this.lblCount = new System.Windows.Forms.Label();
             this.tabCustomers.SuspendLayout();
             this.tabUsers.SuspendLayout();
             this.tabLookup.SuspendLayout();
@@ -256,6 +257,7 @@
             // 
             // tabCustomers
             // 
+            this.tabCustomers.Controls.Add(this.lblCount);
             this.tabCustomers.Controls.Add(this.chkStoreAsIndivilual);
             this.tabCustomers.Controls.Add(this.label14);
             this.tabCustomers.Controls.Add(this.label13);
@@ -817,6 +819,14 @@
             this.tabbedPages.Size = new System.Drawing.Size(617, 409);
             this.tabbedPages.TabIndex = 38;
             // 
+            // lblCount
+            // 
+            this.lblCount.AutoSize = true;
+            this.lblCount.Location = new System.Drawing.Point(165, 299);
+            this.lblCount.Name = "lblCount";
+            this.lblCount.Size = new System.Drawing.Size(0, 13);
+            this.lblCount.TabIndex = 56;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -926,6 +936,7 @@
         private System.Windows.Forms.TextBox txtObjectList;
         private System.Windows.Forms.Label lblObjectList;
         private System.Windows.Forms.TabControl tabbedPages;
+        private System.Windows.Forms.Label lblCount;
     }
 }
 

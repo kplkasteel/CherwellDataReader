@@ -32,7 +32,7 @@ namespace SaggerLookup.CherwellConnector
         {
             try
             {
-                searchResultsRequest.PageSize = 1000;
+                
                 return _searchesApi.SearchesGetSearchResultsAdHocV1(searchResultsRequest);
             }
             catch (ApiException apiException)
