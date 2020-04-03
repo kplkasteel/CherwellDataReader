@@ -291,7 +291,8 @@ namespace SaggerLookup
                                 var template =
                                     CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
                                         templateRequest);
-
+                                template.BusObId = summary.BusObId;
+                                template.BusObName = summary.Name;
                                 templateResponses.Add(template);
                                 if (summary.Group == null || (bool) summary.Group) continue;
                                 foreach (var groupSummary in summary.GroupSummaries)
@@ -305,6 +306,8 @@ namespace SaggerLookup
                                     template =
                                         CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
                                             templateRequest);
+                                    template.BusObId = summary.BusObId;
+                                    template.BusObName = summary.Name;
                                     templateResponses.Add(template);
                                 }
                             }
