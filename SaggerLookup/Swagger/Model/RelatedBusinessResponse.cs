@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using SQLite;
 
 namespace SaggerLookup.Swagger.Model
 {
@@ -9,8 +8,6 @@ namespace SaggerLookup.Swagger.Model
     {
         private List<FieldTemplateItem> _fields;
 
-
-        [PrimaryKey]
         public string Id { get; set; }
         public string ParentBusObId { get; set; }
         public string ParentBusObPublicId { get; set; }
@@ -25,7 +22,7 @@ namespace SaggerLookup.Swagger.Model
                 ? JsonConvert.DeserializeObject<List<FieldTemplateItem>>(value)
                 : new List<FieldTemplateItem>();
         }
-        [Ignore]
+       
         public List<FieldTemplateItem> Fields
         {
             get =>

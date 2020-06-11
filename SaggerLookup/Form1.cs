@@ -77,37 +77,34 @@ namespace SaggerLookup
             var result = false;
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            StaticData.ActiveToken =
-                                CherwellServiceApi.Instance.GetServiceToken(true);
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        if (StaticData.ActiveToken != null)
+                        StaticData.ActiveToken =
+                            CherwellServiceApi.Instance.GetServiceToken(true);
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    if (StaticData.ActiveToken != null)
+                    {
+                        var tokenInfo = new StringBuilder();
+                        tokenInfo.AppendLine(StaticData.ActiveToken.TokenType + " " +
+                                             StaticData.ActiveToken.AccessToken);
+                        tokenInfo.AppendLine(StaticData.ActiveToken.AsclientId);
+                        tokenInfo.AppendLine(
+                            StaticData.ActiveToken.Expires + " " + StaticData.ActiveToken.ExpiresIn);
+                        tokenInfo.AppendLine(StaticData.ActiveToken.Issued);
+                        tokenInfo.AppendLine(StaticData.ActiveToken.RefreshToken);
+                        tokenInfo.AppendLine(StaticData.ActiveToken.Username);
+                        result = true;
+                        txtTokenResponse.Invoke((MethodInvoker) delegate
                         {
-                            var tokenInfo = new StringBuilder();
-                            tokenInfo.AppendLine(StaticData.ActiveToken.TokenType + " " +
-                                                 StaticData.ActiveToken.AccessToken);
-                            tokenInfo.AppendLine(StaticData.ActiveToken.AsclientId);
-                            tokenInfo.AppendLine(
-                                StaticData.ActiveToken.Expires + " " + StaticData.ActiveToken.ExpiresIn);
-                            tokenInfo.AppendLine(StaticData.ActiveToken.Issued);
-                            tokenInfo.AppendLine(StaticData.ActiveToken.RefreshToken);
-                            tokenInfo.AppendLine(StaticData.ActiveToken.Username);
-                            result = true;
-                            txtTokenResponse.Invoke((MethodInvoker) delegate
-                            {
-                                txtTokenResponse.Text = tokenInfo.ToString();
-                            });
-                        }
+                            txtTokenResponse.Text = tokenInfo.ToString();
+                        });
                     }
                 }
-
             }
             catch (Exception exception)
             {
@@ -148,27 +145,23 @@ namespace SaggerLookup
             var summaryList = new List<Summary>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                            var objectList = list.Split(',');
-
-                            summaryList.AddRange(objectList.Select(item => CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(item)).Where(summary => summary != null));
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
-                    _saveFile = summaryList;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(summaryList))
-                            .ToString(Formatting.Indented);
-                    });
-                }
+                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                        var objectList = list.Split(',');
 
-
+                        summaryList.AddRange(objectList.Select(item => CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(item)).Where(summary => summary != null));
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
+                _saveFile = summaryList;
+                txtResultBox.Invoke((MethodInvoker) delegate
+                {
+                    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(summaryList))
+                        .ToString(Formatting.Indented);
+                });
             }
             catch (Exception exception)
             {
@@ -207,46 +200,42 @@ namespace SaggerLookup
             var schemaResponses = new List<SchemaResponse>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                            var objectList = list.Split(',');
-
-                            foreach (var item in objectList)
-                            {
-                                var summary = CherwellBusinessObjectApi.Instance
-                                    .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
-                                if (summary == null) continue;
-                                var schema =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                        summary.BusObId);
-                                schemaResponses.Add(schema);
-                                if (summary.Group == null || (bool) summary.Group) continue;
-                                foreach (var groupSummary in summary.GroupSummaries)
-                                {
-                                    schema =
-                                        CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                            groupSummary.BusObId);
-                                    schemaResponses.Add(schema);
-                                }
-                            }
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        _saveFile = schemaResponses;
-                        txtResultBox.Invoke((MethodInvoker) delegate
+                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                        var objectList = list.Split(',');
+
+                        foreach (var item in objectList)
                         {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(schemaResponses))
-                                .ToString(Formatting.Indented);
-                        });
-                    }
+                            var summary = CherwellBusinessObjectApi.Instance
+                                .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
+                            if (summary == null) continue;
+                            var schema =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                    summary.BusObId);
+                            schemaResponses.Add(schema);
+                            if (summary.Group == null || !(bool) summary.Group) continue;
+                            foreach (var groupSummary in summary.GroupSummaries)
+                            {
+                                schema =
+                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                        groupSummary.BusObId);
+                                schemaResponses.Add(schema);
+                            }
+                        }
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = schemaResponses;
+                    txtResultBox.Invoke((MethodInvoker) delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(schemaResponses))
+                            .ToString(Formatting.Indented);
+                    });
                 }
-
-
             }
             catch (Exception exception)
             {
@@ -269,62 +258,58 @@ namespace SaggerLookup
             var templateResponses = new List<TemplateResponse>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                            var objectList = list.Split(',');
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
+                    {
+                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                        var objectList = list.Split(',');
 
-                            foreach (var item in objectList)
+                        foreach (var item in objectList)
+                        {
+                            var summary = CherwellBusinessObjectApi.Instance
+                                .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
+                            if (summary == null) continue;
+                            var templateRequest = new TemplateRequest
                             {
-                                var summary = CherwellBusinessObjectApi.Instance
-                                    .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
-                                if (summary == null) continue;
-                                var templateRequest = new TemplateRequest
+                                BusObId = summary.BusObId,
+                                IncludeRequired = true,
+                                IncludeAll = true
+                            };
+                            var template =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
+                                    templateRequest);
+                            template.BusObId = summary.BusObId;
+                            template.BusObName = summary.Name;
+                            templateResponses.Add(template);
+                            if (summary.Group == null || !(bool) summary.Group) continue;
+                            foreach (var groupSummary in summary.GroupSummaries)
+                            {
+                                templateRequest = new TemplateRequest
                                 {
-                                    BusObId = summary.BusObId,
+                                    BusObId = groupSummary.BusObId,
                                     IncludeRequired = true,
                                     IncludeAll = true
                                 };
-                                var template =
+                                template =
                                     CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
                                         templateRequest);
-                                template.BusObId = summary.BusObId;
-                                template.BusObName = summary.Name;
+                                template.BusObId = groupSummary.BusObId;
+                                template.BusObName = groupSummary.Name;
                                 templateResponses.Add(template);
-                                if (summary.Group == null || (bool) summary.Group) continue;
-                                foreach (var groupSummary in summary.GroupSummaries)
-                                {
-                                    templateRequest = new TemplateRequest
-                                    {
-                                        BusObId = groupSummary.BusObId,
-                                        IncludeRequired = true,
-                                        IncludeAll = true
-                                    };
-                                    template =
-                                        CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
-                                            templateRequest);
-                                    template.BusObId = summary.BusObId;
-                                    template.BusObName = summary.Name;
-                                    templateResponses.Add(template);
-                                }
                             }
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                        }
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = templateResponses;
+                    txtResultBox.Invoke((MethodInvoker) delegate
                     {
-                        _saveFile = templateResponses;
-                        txtResultBox.Invoke((MethodInvoker) delegate
-                        {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(templateResponses))
-                                .ToString(Formatting.Indented);
-                        });
-                    }
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(templateResponses))
+                            .ToString(Formatting.Indented);
+                    });
                 }
-
-
             }
             catch (Exception exception)
             {
@@ -340,7 +325,7 @@ namespace SaggerLookup
             }
         }
 
-        private void btnAddFilter_Click(object sender, EventArgs e)
+        private void BtnAddFilter_Click(object sender, EventArgs e)
         {
             _filters.Add(new Filters {Field = txtFieldName.Text, Operator = txtOperator.Text, Value = txtValue.Text});
             txtResultBox.Invoke((MethodInvoker) delegate
@@ -351,7 +336,7 @@ namespace SaggerLookup
 
         }
 
-        private void btnClearFilter_Click(object sender, EventArgs e)
+        private void BtnClearFilter_Click(object sender, EventArgs e)
         {
             _filters = new List<Filters>();
             txtFilterList.Text = string.Empty;
@@ -366,54 +351,52 @@ namespace SaggerLookup
 
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var summary =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                    txtLookup.Text);
-                            var schema =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                    summary.BusObId);
-                            var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
-                            var fieldList = list.Split(',');
-
-                            var filterInfoList = (from filter in _filters
-                                let fieldId =
-                                    schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
-                                where !string.IsNullOrEmpty(fieldId)
-                                select new FilterInfo
-                                    {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
-
-                            var fields = fieldList
-                                .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
-                                .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
-
-                            var searchResultsRequest = new SearchResultsRequest
-                            {
-                                BusObId = summary.BusObId,
-                                IncludeAllFields = !fields.Any(),
-                                Fields = fields.Any() ? fields : null,
-                                Filters = filterInfoList,
-                                PageSize = 20000
-                            };
-
-                            readResponses = CherwellSearchesApi.Instance
-                                .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
-
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        _saveFile = readResponses;
-                        txtResultBox.Invoke((MethodInvoker) delegate
+                        var summary =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                txtLookup.Text);
+                        var schema =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                summary.BusObId);
+                        var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
+                        var fieldList = list.Split(',');
+
+                        var filterInfoList = (from filter in _filters
+                            let fieldId =
+                                schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
+                            where !string.IsNullOrEmpty(fieldId)
+                            select new FilterInfo
+                                {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+
+                        var fields = fieldList
+                            .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
+                            .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                        var searchResultsRequest = new SearchResultsRequest
                         {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
-                                .ToString(Formatting.Indented);
-                        });
-                    }
+                            BusObId = summary.BusObId,
+                            IncludeAllFields = !fields.Any(),
+                            Fields = fields.Any() ? fields : null,
+                            Filters = filterInfoList,
+                            PageSize = 20000
+                        };
+
+                        readResponses = CherwellSearchesApi.Instance
+                            .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
+
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = readResponses;
+                    txtResultBox.Invoke((MethodInvoker) delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
+                            .ToString(Formatting.Indented);
+                    });
                 }
             }
             catch (Exception exception)
@@ -446,111 +429,108 @@ namespace SaggerLookup
 
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
+                    {
+                        var summary =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                "UserInfo");
+                        var schema =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                summary.BusObId);
+                        var list = txtUserFields.Text.Replace("\n", "").Replace("\r", "");
+                        var fieldList = list.Split(',');
+
+                        var fieldIds = fieldList
+                            .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
+                            .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                        var searchResultRequest = new SearchResultsRequest
                         {
-                            var summary =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                    "UserInfo");
-                            var schema =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                    summary.BusObId);
-                            var list = txtUserFields.Text.Replace("\n", "").Replace("\r", "");
-                            var fieldList = list.Split(',');
+                            BusObId = summary.BusObId,
+                            Filters = new List<FilterInfo>(),
+                            PageSize = 20000,
+                            IncludeAllFields = false
+                        };
 
-                            var fieldIds = fieldList
-                                .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
-                                .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
-
-                            var searchResultRequest = new SearchResultsRequest
+                        var searchResponse =
+                            CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest);
+                        var count = 0;
+                        foreach (var readResponse in searchResponse.BusinessObjects)
+                        {
+                            var filterInfo = new FilterInfo
                             {
-                                BusObId = summary.BusObId,
-                                Filters = new List<FilterInfo>(),
-                                PageSize = 20000,
-                                IncludeAllFields = false
+                                FieldId = schema.FirstRecIdField, Operator = "eq", Value = readResponse.BusObRecId
+                            };
+                            searchResultRequest.BusObId = readResponse.BusObId;
+                            searchResultRequest.Filters = new List<FilterInfo> {filterInfo};
+                            searchResultRequest.IncludeAllFields = !fieldIds.Any();
+                            searchResultRequest.PageSize = 20000;
+                            searchResultRequest.Fields = fieldIds.Any() ? fieldIds : null;
+
+                            lblUserTotal.Invoke((MethodInvoker)delegate
+                            {
+                                lblUserTotal.Text = $"Downloading {++count} of {searchResponse.BusinessObjects.Count} users";
+                            });
+
+                            var item = CherwellSearchesApi.Instance
+                                .SearchesGetSearchResultsAdHocV1(searchResultRequest).BusinessObjects
+                                .SingleOrDefault(x => x.BusObRecId == readResponse.BusObRecId);
+                            if (item == null) continue;
+
+                            byte[] avatarBytes = null;
+                            if (!string.IsNullOrEmpty(item.ReadFieldInformation("Avatar")))
+                            {
+                                avatarBytes =
+                                    CherwellCoreApi.Instance.CoreGetGalleryImageV1(
+                                        item.ReadFieldInformation("Avatar"),
+                                        null, null);
+                            }
+
+                            var teams = CherwellTeamsApi.Instance.TeamsGetUsersTeamsV2(item.BusObRecId);
+
+
+                            var info = new UserInfo
+                            {
+                                BusObId = readResponse.BusObRecId,
+                                BusObPublicId = readResponse.BusObPublicId,
+                                BusObRecId = readResponse.BusObRecId,
+                                FirstName = readResponse.ReadFieldInformation(nameof(UserInfo.FirstName)),
+                                FullName = readResponse.ReadFieldInformation(nameof(UserInfo.FullName)),
+                                LastName = readResponse.ReadFieldInformation(nameof(UserInfo.LastName)),
+                                Phone = readResponse.ReadFieldInformation(nameof(UserInfo.Phone)),
+                                Email = readResponse.ReadFieldInformation(nameof(UserInfo.Email)),
+                                DefaultTeamID = readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamID)),
+                                DefaultTeamName =
+                                    readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamName)),
+                                Avatar = readResponse.ReadFieldInformation(nameof(UserInfo.Avatar)),
+                                AvatarBytes = avatarBytes,
+                                Teams = teams.Teams,
+                                LastModifiedDateTime =
+                                    readResponse.ReadFieldInformation(nameof(UserInfo.LastModifiedDateTime))
                             };
 
-                            var searchResponse =
-                                CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest);
-
-                            foreach (var readResponse in searchResponse.BusinessObjects)
-                            {
-                                var filterInfo = new FilterInfo
-                                {
-                                    FieldId = schema.FirstRecIdField, Operator = "eq", Value = readResponse.BusObRecId
-                                };
-                                searchResultRequest.BusObId = readResponse.BusObId;
-                                searchResultRequest.Filters = new List<FilterInfo> {filterInfo};
-                                searchResultRequest.IncludeAllFields = !fieldIds.Any();
-                                searchResultRequest.PageSize = 20000;
-                                searchResultRequest.Fields = fieldIds.Any() ? fieldIds : null;
-
-                                var item = CherwellSearchesApi.Instance
-                                    .SearchesGetSearchResultsAdHocV1(searchResultRequest).BusinessObjects
-                                    .SingleOrDefault(x => x.BusObRecId == readResponse.BusObRecId);
-                                if (item == null) continue;
-
-                                byte[] avatarBytes = null;
-                                if (!string.IsNullOrEmpty(item.ReadFieldInformation("Avatar")))
-                                {
-                                    avatarBytes =
-                                        CherwellCoreApi.Instance.CoreGetGalleryImageV1(
-                                            item.ReadFieldInformation("Avatar"),
-                                            null, null);
-                                }
-
-                                var teams = CherwellTeamsApi.Instance.TeamsGetUsersTeamsV2(item.BusObRecId);
-
-
-                                var info = new UserInfo
-                                {
-                                    BusObId = readResponse.BusObRecId,
-                                    BusObPublicId = readResponse.BusObPublicId,
-                                    BusObRecId = readResponse.BusObRecId,
-                                    FirstName = readResponse.ReadFieldInformation(nameof(UserInfo.FirstName)),
-                                    FullName = readResponse.ReadFieldInformation(nameof(UserInfo.FullName)),
-                                    LastName = readResponse.ReadFieldInformation(nameof(UserInfo.LastName)),
-                                    Phone = readResponse.ReadFieldInformation(nameof(UserInfo.Phone)),
-                                    Email = readResponse.ReadFieldInformation(nameof(UserInfo.Email)),
-                                    DefaultTeamID = readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamID)),
-                                    DefaultTeamName =
-                                        readResponse.ReadFieldInformation(nameof(UserInfo.DefaultTeamName)),
-                                    Avatar = readResponse.ReadFieldInformation(nameof(UserInfo.Avatar)),
-                                    AvatarBytes = avatarBytes,
-                                    Teams = teams.Teams,
-                                    LastModifiedDateTime =
-                                        readResponse.ReadFieldInformation(nameof(UserInfo.LastModifiedDateTime))
-                                };
-
-                                users.Add(info);
-                                if (!chkStoreIndiviual.Checked) continue;
-                                if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
-                                using (var file =
-                                    File.CreateText(Path.Combine(folderBrowserDialog1.SelectedPath,
-                                        info.BusObRecId + ".json")))
-                                {
-                                    var serializer = new JsonSerializer();
-                                    serializer.Serialize(file, info);
-                                }
-                            }
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                            users.Add(info);
+                            if (!chkStoreIndiviual.Checked) continue;
+                            if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
+                            using var file =
+                                File.CreateText(Path.Combine(folderBrowserDialog1.SelectedPath,
+                                    info.BusObRecId + ".json"));
+                            var serializer = new JsonSerializer();
+                            serializer.Serialize(file, info);
+                        }
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = users;
+                    txtResultBox.Invoke((MethodInvoker) delegate
                     {
-                        _saveFile = users;
-                        txtResultBox.Invoke((MethodInvoker) delegate
-                        {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(users))
-                                .ToString(Formatting.Indented);
-                        });
-                    }
-
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(users))
+                            .ToString(Formatting.Indented);
+                    });
                 }
-
-
-
             }
             catch (Exception exception)
             {
@@ -575,38 +555,36 @@ namespace SaggerLookup
             var teams = new List<Team>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
-
-
-                            foreach (var team in teams)
-                            {
-                                team.Type = TeamType.Team.ToString();
-                            }
-
-                            var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
-
-                            foreach (var workgroup in workGroups)
-                            {
-                                workgroup.Type = TeamType.WorkGroup.ToString();
-                            }
-
-                            teams.AddRange(workGroups);
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        _saveFile = teams;
-                        txtResultBox.Invoke((MethodInvoker) delegate
+                        teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
+
+
+                        foreach (var team in teams)
                         {
-                            txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
-                                .ToString(Formatting.Indented);
-                        });
-                    }
+                            team.Type = TeamType.Team.ToString();
+                        }
+
+                        var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
+
+                        foreach (var workgroup in workGroups)
+                        {
+                            workgroup.Type = TeamType.WorkGroup.ToString();
+                        }
+
+                        teams.AddRange(workGroups);
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = teams;
+                    txtResultBox.Invoke((MethodInvoker) delegate
+                    {
+                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
+                            .ToString(Formatting.Indented);
+                    });
                 }
             }
             catch (Exception exception)
@@ -625,7 +603,7 @@ namespace SaggerLookup
         }
 
 
-        private void btnCustomerAddFilter_Click(object sender, EventArgs e)
+        private void BtnCustomerAddFilter_Click(object sender, EventArgs e)
         {
             _filters.Add(new Filters
             {
@@ -645,7 +623,7 @@ namespace SaggerLookup
             txtFilterList.Text = string.Empty;
         }
 
-        private async void btnCustomerGetItems_Click(object sender, EventArgs e)
+        private async void BtnCustomerGetItems_Click(object sender, EventArgs e)
         {
             if (StaticData.ActiveToken == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
@@ -661,152 +639,148 @@ namespace SaggerLookup
 
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
+                    {
+                        lblCount.Invoke((MethodInvoker) delegate { lblCount.Text = string.Empty; });
+                        var summary =
+                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                "Customer");
+                        foreach (var groupSummary in summary.GroupSummaries)
                         {
-                            lblCount.Invoke((MethodInvoker) delegate { lblCount.Text = string.Empty; });
-                            var summary =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                    "Customer");
-                            foreach (var groupSummary in summary.GroupSummaries)
+                            var schema =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                    groupSummary.BusObId);
+                            var list = txtCustomerFields.Text.Replace("\n", "").Replace("\r", "");
+                            var fieldList = list.Split(',');
+
+                            var filterInfoList = (from filter in _filters
+                                let fieldId =
+                                    schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
+                                where !string.IsNullOrEmpty(fieldId)
+                                select new FilterInfo
+                                    {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+
+                            var fields = fieldList
+                                .Select(field =>
+                                    schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
+                                .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
+
+                            var searchResultsRequest = new SearchResultsRequest
                             {
-                                var schema =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                        groupSummary.BusObId);
-                                var list = txtCustomerFields.Text.Replace("\n", "").Replace("\r", "");
-                                var fieldList = list.Split(',');
+                                BusObId = summary.BusObId,
+                                IncludeAllFields = false,
+                                Fields = null,
+                                Filters = filterInfoList,
+                                PageSize = 20000
+                            };
 
-                                var filterInfoList = (from filter in _filters
-                                    let fieldId =
-                                        schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
-                                    where !string.IsNullOrEmpty(fieldId)
-                                    select new FilterInfo
-                                        {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
-
-                                var fields = fieldList
-                                    .Select(field =>
-                                        schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
-                                    .Where(fieldId => !string.IsNullOrEmpty(fieldId)).ToList();
-
-                                var searchResultsRequest = new SearchResultsRequest
+                            var readResponses = CherwellSearchesApi.Instance
+                                .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
+                            foreach (var response in readResponses)
+                            {
+                                searchResultsRequest = new SearchResultsRequest
                                 {
-                                    BusObId = summary.BusObId,
+                                    BusObId = response.BusObId,
                                     IncludeAllFields = false,
-                                    Fields = null,
-                                    Filters = filterInfoList,
-                                    PageSize = 20000
-                                };
-
-                                var readResponses = CherwellSearchesApi.Instance
-                                    .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
-                                foreach (var response in readResponses)
-                                {
-                                    searchResultsRequest = new SearchResultsRequest
+                                    Fields = fields,
+                                    Filters = new List<FilterInfo>
                                     {
-                                        BusObId = response.BusObId,
-                                        IncludeAllFields = false,
-                                        Fields = fields,
-                                        Filters = new List<FilterInfo>
+                                        new FilterInfo
                                         {
-                                            new FilterInfo
-                                            {
-                                                FieldId = schema.RecIdFields,
-                                                Operator = "eq",
-                                                Value = response.BusObRecId
-                                            }
-                                        },
-                                    };
-                                    var newCustomer =
-                                        CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(
-                                            searchResultsRequest);
-
-                                    if (newCustomer?.BusinessObjects == null) continue;
-                                    foreach (var readResponse in newCustomer.BusinessObjects)
-
-                                    {
-                                        var avatarBytes = new byte[0];
-                                        var avatar = readResponse.ReadFieldInformation("Avatar");
-                                        if (!string.IsNullOrEmpty(avatar))
-                                        {
-                                            try
-                                            {
-                                                avatarBytes =
-                                                    CherwellCoreApi.Instance.CoreGetGalleryImageV1(avatar, null,
-                                                        null);
-                                            }
-                                            catch (Exception)
-                                            {
-                                                // do nothing.
-                                            }
+                                            FieldId = schema.RecIdFields,
+                                            Operator = "eq",
+                                            Value = response.BusObRecId
                                         }
+                                    },
+                                };
+                                var newCustomer =
+                                    CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(
+                                        searchResultsRequest);
 
-                                        var customer = new Customer
+                                if (newCustomer?.BusinessObjects == null) continue;
+                                foreach (var readResponse in newCustomer.BusinessObjects)
+
+                                {
+                                    var avatarBytes = new byte[0];
+                                    var avatar = readResponse.ReadFieldInformation("Avatar");
+                                    if (!string.IsNullOrEmpty(avatar))
+                                    {
+                                        try
                                         {
-                                            BusObId = readResponse.BusObRecId,
-                                            BusObPublicId = readResponse.BusObPublicId,
-                                            BusObRecId = readResponse.BusObRecId,
-                                            AvatarBytes = avatarBytes,
-                                            FirstName = readResponse.ReadFieldInformation(
-                                                nameof(Customer.FirstName)),
-                                            LastName = readResponse.ReadFieldInformation(nameof(Customer.LastName)),
-                                            FullName = readResponse.ReadFieldInformation(nameof(Customer.FullName)),
-                                            CustomerTypeName =
-                                                readResponse.ReadFieldInformation(
-                                                    nameof(Customer.CustomerTypeName)),
-                                            Email = readResponse.ReadFieldInformation(nameof(Customer.Email)),
-                                            Phone = readResponse.ReadFieldInformation(nameof(Customer.Phone)),
-                                            Department =
-                                                readResponse.ReadFieldInformation(nameof(Customer.Department)),
-                                            Avatar = readResponse.ReadFieldInformation(nameof(Customer.Avatar)),
-                                            LastModDateTime =
-                                                readResponse.ReadFieldInformation(nameof(Customer.LastModDateTime)),
-                                            City = readResponse.ReadFieldInformation(nameof(Customer.City)),
-                                            Address1 = readResponse.ReadFieldInformation(nameof(Customer.Address1)),
-                                            Address2 = readResponse.ReadFieldInformation(nameof(Customer.Address2)),
-                                            Office = readResponse.ReadFieldInformation(nameof(Customer.Office)),
-                                            Building = readResponse.ReadFieldInformation(nameof(Customer.Building)),
-                                            Room = readResponse.ReadFieldInformation(nameof(Customer.Room)),
-                                            Country = readResponse.ReadFieldInformation(nameof(Customer.Country)),
-                                            Manager = readResponse.ReadFieldInformation(nameof(Customer.Manager)),
-                                            SLAName = readResponse.ReadFieldInformation(nameof(Customer.SLAName)),
-                                            ProvinceStateName =
-                                                readResponse.ReadFieldInformation(
-                                                    nameof(Customer.ProvinceStateName)),
-                                            Mobile = readResponse.ReadFieldInformation(nameof(Customer.Mobile))
-                                        };
-                                        customers.Add(customer);
-                                        lblCount.Invoke((MethodInvoker) delegate
+                                            avatarBytes =
+                                                CherwellCoreApi.Instance.CoreGetGalleryImageV1(avatar, null,
+                                                    null);
+                                        }
+                                        catch (Exception)
                                         {
-                                            lblCount.Text =
-                                                $"Downloaded Customer {customers.Count} out of {readResponses.Count}";});
-                                        if (!chkStoreAsIndivilual.Checked) continue;
-                                        if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
-                                        using (var file =
-                                            File.CreateText(Path.Combine(folderBrowserDialog1.SelectedPath,
-                                                customer.BusObRecId + ".json")))
-                                        {
-                                            var serializer = new JsonSerializer();
-                                            serializer.Serialize(file, customer);
+                                            // do nothing.
                                         }
                                     }
+
+                                    var customer = new Customer
+                                    {
+                                        BusObId = readResponse.BusObRecId,
+                                        BusObPublicId = readResponse.BusObPublicId,
+                                        BusObRecId = readResponse.BusObRecId,
+                                        AvatarBytes = avatarBytes,
+                                        FirstName = readResponse.ReadFieldInformation(
+                                            nameof(Customer.FirstName)),
+                                        LastName = readResponse.ReadFieldInformation(nameof(Customer.LastName)),
+                                        FullName = readResponse.ReadFieldInformation(nameof(Customer.FullName)),
+                                        CustomerTypeName =
+                                            readResponse.ReadFieldInformation(
+                                                nameof(Customer.CustomerTypeName)),
+                                        Email = readResponse.ReadFieldInformation(nameof(Customer.Email)),
+                                        Phone = readResponse.ReadFieldInformation(nameof(Customer.Phone)),
+                                        Department =
+                                            readResponse.ReadFieldInformation(nameof(Customer.Department)),
+                                        Avatar = readResponse.ReadFieldInformation(nameof(Customer.Avatar)),
+                                        LastModDateTime =
+                                            readResponse.ReadFieldInformation(nameof(Customer.LastModDateTime)),
+                                        City = readResponse.ReadFieldInformation(nameof(Customer.City)),
+                                        Address1 = readResponse.ReadFieldInformation(nameof(Customer.Address1)),
+                                        Address2 = readResponse.ReadFieldInformation(nameof(Customer.Address2)),
+                                        Office = readResponse.ReadFieldInformation(nameof(Customer.Office)),
+                                        Building = readResponse.ReadFieldInformation(nameof(Customer.Building)),
+                                        Room = readResponse.ReadFieldInformation(nameof(Customer.Room)),
+                                        Country = readResponse.ReadFieldInformation(nameof(Customer.Country)),
+                                        Manager = readResponse.ReadFieldInformation(nameof(Customer.Manager)),
+                                        SLAName = readResponse.ReadFieldInformation(nameof(Customer.SLAName)),
+                                        ProvinceStateName =
+                                            readResponse.ReadFieldInformation(
+                                                nameof(Customer.ProvinceStateName)),
+                                        Mobile = readResponse.ReadFieldInformation(nameof(Customer.Mobile))
+                                    };
+                                    customers.Add(customer);
+                                    lblCount.Invoke((MethodInvoker) delegate
+                                    {
+                                        lblCount.Text =
+                                            $"Downloaded Customer {customers.Count} out of {readResponses.Count}";});
+                                    if (!chkStoreAsIndivilual.Checked) continue;
+                                    if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
+                                    using var file =
+                                        File.CreateText(Path.Combine(folderBrowserDialog1.SelectedPath,
+                                            customer.BusObRecId + ".json"));
+                                    var serializer = new JsonSerializer();
+                                    serializer.Serialize(file, customer);
                                 }
                             }
+                        }
 
-                        },
+                    },
 
-                        cancellationToken.Token);
+                    cancellationToken.Token);
 
-                    if (await Task.WhenAny(task).ConfigureAwait(false) == task)
-                    {
-                        _saveFile = customers;
-                        //txtResultBox.Invoke((MethodInvoker) delegate
-                        //{
-                        //    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(customers))
-                        //        .ToString(Formatting.Indented);
-                        //});
-                    }
+                if (await Task.WhenAny(task).ConfigureAwait(false) == task)
+                {
+                    _saveFile = customers;
+                    //txtResultBox.Invoke((MethodInvoker) delegate
+                    //{
+                    //    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(customers))
+                    //        .ToString(Formatting.Indented);
+                    //});
                 }
             }
 
@@ -833,37 +807,33 @@ namespace SaggerLookup
             var searchFolders = new List<SearchFolder>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                            var objectList = list.Split(',');
-                            foreach (var association in objectList)
-                            {
-                                var summary =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                        association);
-                                if (summary == null) continue;
-
-                                var searchFolder =
-                                    CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(
-                                        summary.BusObId);
-                                searchFolders.Add(searchFolder.Root);
-                            }
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
-                    _saveFile = searchFolders;
-                    txtResultBox.Invoke((MethodInvoker)delegate
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(searchFolders))
-                            .ToString(Formatting.Indented);
-                    });
-                }
+                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                        var objectList = list.Split(',');
+                        foreach (var association in objectList)
+                        {
+                            var summary =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                    association);
+                            if (summary == null) continue;
 
-
+                            var searchFolder =
+                                CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(
+                                    summary.BusObId);
+                            searchFolders.Add(searchFolder.Root);
+                        }
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
+                _saveFile = searchFolders;
+                txtResultBox.Invoke((MethodInvoker)delegate
+                {
+                    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(searchFolders))
+                        .ToString(Formatting.Indented);
+                });
             }
             catch (Exception exception)
             {
@@ -887,37 +857,33 @@ namespace SaggerLookup
             var oneStepFolders = new List<ManagerFolder>();
             try
             {
-                using (var cancellationToken = new CancellationTokenSource())
-                {
-                    var task = Task.Run(
-                        () =>
-                        {
-                            var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
-                            var objectList = list.Split(',');
-                            foreach (var association in objectList)
-                            {
-                                var summary =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
-                                        association);
-                                if (summary == null) continue;
-                                var oneSteps =
-                                    CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId);
-                                if (oneSteps == null) continue;
-                            
-                                oneStepFolders.Add(oneSteps.Root);
-                            }
-                        },
-                        cancellationToken.Token);
-                    if (await Task.WhenAny(task).ConfigureAwait(false) != task) return; 
-                    _saveFile = oneStepFolders;
-                    txtResultBox.Invoke((MethodInvoker)delegate
+                using var cancellationToken = new CancellationTokenSource();
+                var task = Task.Run(
+                    () =>
                     {
-                        txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(oneStepFolders))
-                            .ToString(Formatting.Indented);
-                    });
-                }
-
-
+                        var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
+                        var objectList = list.Split(',');
+                        foreach (var association in objectList)
+                        {
+                            var summary =
+                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                    association);
+                            if (summary == null) continue;
+                            var oneSteps =
+                                CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId);
+                            if (oneSteps == null) continue;
+                            
+                            oneStepFolders.Add(oneSteps.Root);
+                        }
+                    },
+                    cancellationToken.Token);
+                if (await Task.WhenAny(task).ConfigureAwait(false) != task) return; 
+                _saveFile = oneStepFolders;
+                txtResultBox.Invoke((MethodInvoker)delegate
+                {
+                    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(oneStepFolders))
+                        .ToString(Formatting.Indented);
+                });
             }
             catch (Exception exception)
             {

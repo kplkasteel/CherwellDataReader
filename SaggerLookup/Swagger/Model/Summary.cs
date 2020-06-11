@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using SQLite;
 
 namespace SaggerLookup.Swagger.Model
 {
@@ -13,7 +12,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name = "firstRecIdField", EmitDefaultValue = false),]
         public string FirstRecIdField { get; set; }
 
-        [DataMember(Name = "groupSummaries", EmitDefaultValue = false), Ignore] 
+        [DataMember(Name = "groupSummaries", EmitDefaultValue = false)] 
         public List<Summary> GroupSummaries
         {
             get =>
@@ -39,7 +38,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name = "states", EmitDefaultValue = false)]
         public string States { get; set; }
 
-        [DataMember(Name = "busObId", EmitDefaultValue = false), PrimaryKey]
+        [DataMember(Name = "busObId", EmitDefaultValue = false)]
         public string BusObId { get; set; }
 
         [DataMember(Name = "displayName", EmitDefaultValue = false)]

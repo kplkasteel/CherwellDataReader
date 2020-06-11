@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using SQLite;
 
 namespace SaggerLookup.Swagger.Model
 {
@@ -8,7 +7,7 @@ namespace SaggerLookup.Swagger.Model
     public class Team
     {
         
-        [DataMember(Name="teamId", EmitDefaultValue=false), PrimaryKey]
+        [DataMember(Name="teamId", EmitDefaultValue=false)]
         public string TeamId { get; set; }
 
         [DataMember(Name="teamName", EmitDefaultValue=false)]

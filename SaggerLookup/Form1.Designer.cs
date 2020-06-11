@@ -47,6 +47,7 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.tabSearches = new System.Windows.Forms.TabPage();
             this.tabCustomers = new System.Windows.Forms.TabPage();
+            this.lblCount = new System.Windows.Forms.Label();
             this.chkStoreAsIndivilual = new System.Windows.Forms.CheckBox();
             this.label14 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
@@ -64,6 +65,7 @@
             this.btnCustomerClearFilters = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
             this.tabUsers = new System.Windows.Forms.TabPage();
+            this.lblUserTotal = new System.Windows.Forms.Label();
             this.btnGetTeams = new System.Windows.Forms.Button();
             this.chkStoreIndiviual = new System.Windows.Forms.CheckBox();
             this.txtUserFields = new System.Windows.Forms.TextBox();
@@ -96,7 +98,6 @@
             this.txtObjectList = new System.Windows.Forms.TextBox();
             this.lblObjectList = new System.Windows.Forms.Label();
             this.tabbedPages = new System.Windows.Forms.TabControl();
-            this.lblCount = new System.Windows.Forms.Label();
             this.tabCustomers.SuspendLayout();
             this.tabUsers.SuspendLayout();
             this.tabLookup.SuspendLayout();
@@ -283,6 +284,14 @@
             this.tabCustomers.Text = "Customers";
             this.tabCustomers.UseVisualStyleBackColor = true;
             // 
+            // lblCount
+            // 
+            this.lblCount.AutoSize = true;
+            this.lblCount.Location = new System.Drawing.Point(165, 299);
+            this.lblCount.Name = "lblCount";
+            this.lblCount.Size = new System.Drawing.Size(0, 13);
+            this.lblCount.TabIndex = 56;
+            // 
             // chkStoreAsIndivilual
             // 
             this.chkStoreAsIndivilual.AutoSize = true;
@@ -368,7 +377,7 @@
             this.btnCustomerGetItems.TabIndex = 51;
             this.btnCustomerGetItems.Text = "Get Objects";
             this.btnCustomerGetItems.UseVisualStyleBackColor = true;
-            this.btnCustomerGetItems.Click += new System.EventHandler(this.btnCustomerGetItems_Click);
+            this.btnCustomerGetItems.Click += new System.EventHandler(this.BtnCustomerGetItems_Click);
             // 
             // label8
             // 
@@ -419,7 +428,7 @@
             this.btnCustomerAddFilter.TabIndex = 43;
             this.btnCustomerAddFilter.Text = "Add Filter";
             this.btnCustomerAddFilter.UseVisualStyleBackColor = true;
-            this.btnCustomerAddFilter.Click += new System.EventHandler(this.btnCustomerAddFilter_Click);
+            this.btnCustomerAddFilter.Click += new System.EventHandler(this.BtnCustomerAddFilter_Click);
             // 
             // btnCustomerClearFilters
             // 
@@ -446,6 +455,7 @@
             // 
             // tabUsers
             // 
+            this.tabUsers.Controls.Add(this.lblUserTotal);
             this.tabUsers.Controls.Add(this.btnGetTeams);
             this.tabUsers.Controls.Add(this.chkStoreIndiviual);
             this.tabUsers.Controls.Add(this.txtUserFields);
@@ -459,6 +469,14 @@
             this.tabUsers.TabIndex = 2;
             this.tabUsers.Text = "Users";
             this.tabUsers.UseVisualStyleBackColor = true;
+            // 
+            // lblUserTotal
+            // 
+            this.lblUserTotal.AutoSize = true;
+            this.lblUserTotal.Location = new System.Drawing.Point(179, 47);
+            this.lblUserTotal.Name = "lblUserTotal";
+            this.lblUserTotal.Size = new System.Drawing.Size(0, 13);
+            this.lblUserTotal.TabIndex = 30;
             // 
             // btnGetTeams
             // 
@@ -674,7 +692,7 @@
             this.btnAddFilter.TabIndex = 28;
             this.btnAddFilter.Text = "Add Filter";
             this.btnAddFilter.UseVisualStyleBackColor = true;
-            this.btnAddFilter.Click += new System.EventHandler(this.btnAddFilter_Click);
+            this.btnAddFilter.Click += new System.EventHandler(this.BtnAddFilter_Click);
             // 
             // btnClearFilter
             // 
@@ -685,7 +703,7 @@
             this.btnClearFilter.TabIndex = 29;
             this.btnClearFilter.Text = "Clear Filters";
             this.btnClearFilter.UseVisualStyleBackColor = true;
-            this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
+            this.btnClearFilter.Click += new System.EventHandler(this.BtnClearFilter_Click);
             // 
             // label2
             // 
@@ -819,14 +837,6 @@
             this.tabbedPages.Size = new System.Drawing.Size(617, 409);
             this.tabbedPages.TabIndex = 38;
             // 
-            // lblCount
-            // 
-            this.lblCount.AutoSize = true;
-            this.lblCount.Location = new System.Drawing.Point(165, 299);
-            this.lblCount.Name = "lblCount";
-            this.lblCount.Size = new System.Drawing.Size(0, 13);
-            this.lblCount.TabIndex = 56;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -937,6 +947,7 @@
         private System.Windows.Forms.Label lblObjectList;
         private System.Windows.Forms.TabControl tabbedPages;
         private System.Windows.Forms.Label lblCount;
+        private System.Windows.Forms.Label lblUserTotal;
     }
 }
 

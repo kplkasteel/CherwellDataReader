@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using SQLite;
 
 namespace SaggerLookup.Swagger.Model
 {
@@ -12,10 +11,10 @@ namespace SaggerLookup.Swagger.Model
         private List<GridDefinition> _gridDefinitions;
         private List<Relationship> _relationships;
 
-        [DataMember(Name = "busObId", EmitDefaultValue = false), PrimaryKey]
+        [DataMember(Name = "busObId", EmitDefaultValue = false)]
         public string BusObId { get; set; }
 
-        [DataMember(Name = "fieldDefinitions", EmitDefaultValue = false), Ignore]
+        [DataMember(Name = "fieldDefinitions", EmitDefaultValue = false)]
         public List<FieldDefinition> FieldDefinitions
         {
             get =>
@@ -35,7 +34,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name = "firstRecIdField", EmitDefaultValue = false)]
         public string FirstRecIdField { get; set; }
 
-        [DataMember(Name = "gridDefinitions", EmitDefaultValue = false), Ignore]
+        [DataMember(Name = "gridDefinitions", EmitDefaultValue = false)]
         public List<GridDefinition> GridDefinitions
         {
             get =>
@@ -61,7 +60,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name = "recIdFields", EmitDefaultValue = false)]
         public string RecIdFields { get; set; }
 
-        [DataMember(Name = "relationships", EmitDefaultValue = false), Ignore]
+        [DataMember(Name = "relationships", EmitDefaultValue = false)]
         public List<Relationship> Relationships
         {
             get =>

@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Newtonsoft.Json;
 using RestSharp;
 using SaggerLookup.Models;
@@ -61,14 +60,14 @@ namespace SaggerLookup.Helpers
             catch (JsonException)
             {
                 if (apiException != null)
-                    DisplayMessage("HTTP Error", apiException.ErrorContent, "OK");
+                    DisplayMessage("HTTP Error", apiException.ErrorContent);
             }
 
 
 
         }
 
-        public static void DisplayMessage(string header, string body, string ok)
+        public static void DisplayMessage(string header, string body)
         {
             MessageBox.Show(body, header, MessageBoxButtons.OK);
            
@@ -84,32 +83,25 @@ namespace SaggerLookup.Helpers
                 switch (message?.Error)
                 {
                     case "invalid_grant":
-                        DisplayMessage("Login Error", "Username and/or password is incorrect.", "OK");
+                        DisplayMessage("Login Error", "Username and/or password is incorrect.");
                         break;
                         
                     case "invalid_client_id":
-                        DisplayMessage("Client ID error", message.Description, "OK");
+                        DisplayMessage("Client ID error", message.Description);
                         break;
                     default:
-                        DisplayMessage("Unknown Login Error", message?.Description, "OK");
+                        DisplayMessage("Unknown Login Error", message?.Description);
                         break;
                 }
             }
             catch (JsonException)
             {
                 if (apiException != null)
-                    DisplayMessage("HTTP Error", apiException.ErrorContent, "OK");
+                    DisplayMessage("HTTP Error", apiException.ErrorContent);
             }
 
         }
 
-
-        public static void LoginErrorMessage(IRestResponse response)
-        {
-            if (response?.StatusCode != null)
-                DisplayMessage("HTTP Error " + ((int) response?.StatusCode),
-                    HttpErrors.GetErrorCode((int) response.StatusCode), "OK");
-        }
 
 
 

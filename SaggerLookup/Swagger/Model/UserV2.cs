@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using SQLite;
 
 namespace SaggerLookup.Swagger.Model
 {
@@ -35,7 +34,7 @@ namespace SaggerLookup.Swagger.Model
         [DataMember(Name = "publicId", EmitDefaultValue = false)]
         public string PublicId { get; set; }
 
-        [DataMember(Name = "recordId", EmitDefaultValue = false), PrimaryKey]
+        [DataMember(Name = "recordId", EmitDefaultValue = false)]
         public string RecordId { get; set; }
 
         [DataMember(Name = "securityGroupId", EmitDefaultValue = false)]
@@ -57,7 +56,7 @@ namespace SaggerLookup.Swagger.Model
         public string UserName { get; set; }
         public string Password { get; set; }
 
-        [Ignore]
+       
         public List<Team> Teams
         {
             get =>
@@ -85,7 +84,7 @@ namespace SaggerLookup.Swagger.Model
                 : new List<FieldTemplateItem>();
         }
 
-        [DataMember(Name = "fields", EmitDefaultValue = false), Ignore]
+        [DataMember(Name = "fields", EmitDefaultValue = false)]
         public List<FieldTemplateItem> Fields
         {
             get =>
