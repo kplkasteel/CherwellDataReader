@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace SaggerLookup
+namespace SwaggerLookup
 {
     static class Program
     {

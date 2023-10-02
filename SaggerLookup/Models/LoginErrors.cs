@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace SaggerLookup.Models
+namespace SwaggerLookup.Models
 {
     public class LoginErrors
     {

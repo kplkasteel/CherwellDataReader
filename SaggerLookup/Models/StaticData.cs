@@ -1,12 +1,10 @@
 ﻿
-using SaggerLookup.Swagger.Model;
+using SwaggerLookup.Helpers.CherwellConnector.Model;
 
-namespace SaggerLookup.Models
+namespace SwaggerLookup.Models
 {
     public class StaticData
     {
-        public static ServiceInfoResponse ActiveServiceInfo { get; set; }
-        public static TokenResponse ActiveToken { get; set; }
         public static UserV2 ActiveUser { get; set; }
         public static bool IsLoggedIn { get; set; }
         

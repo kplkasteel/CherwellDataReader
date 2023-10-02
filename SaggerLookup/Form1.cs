@@ -8,22 +8,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SaggerLookup.CherwellConnector;
-using SaggerLookup.Enum;
-using SaggerLookup.Models;
-using SaggerLookup.Properties;
-using SaggerLookup.Swagger.Api;
-using SaggerLookup.Swagger.Model;
+using SwaggerLookup.Helpers.CherwellConnector.Api;
+using SwaggerLookup.Helpers.CherwellConnector.Enum;
+using SwaggerLookup.Helpers.CherwellConnector.Model;
+using SwaggerLookup.Models;
+using SwaggerLookup.Properties;
 using Formatting = Newtonsoft.Json.Formatting;
 
-namespace SaggerLookup
+namespace SwaggerLookup
 {
     public partial class Form1 : Form
     {
 
         private object _saveFile;
 
-        private List<Filters> _filters = new List<Filters>();
+        private List<Filters> _filters = new();
 
         public Form1()
         {
@@ -32,8 +31,11 @@ namespace SaggerLookup
             toolTip1.SetToolTip(txtFields, "Use comma separated values");
             toolTip1.SetToolTip(txtOperator, "Available operators are:\neq - Equals specified value\ngt - Greater than specified value\nlt - Less than specified value\ncontains - Contains specified value\nstartswith - Starts with specified value");
             toolTip1.SetToolTip(txtObjectList, "Use comma separated values");
-
-
+            Settings.Default.Reload();
+            txtEndPoint.Text = Settings.Default.Endpoint;
+            txtClientId.Text = Settings.Default.ClientID;
+            txtUserName.Text = Settings.Default.UserName;
+            txtPassword.Text = Settings.Default.Password;
         }
 
         private async void Login_Click(object sender, EventArgs e)
@@ -67,12 +69,7 @@ namespace SaggerLookup
                 return;
             }
 
-            CherwellServiceApi.Instance.AuthMode = AuthModes.Internal;
-            CherwellServiceApi.Instance.EndPoint = txtEndPoint.Text + "/CherwellAPI";
-            CherwellServiceApi.Instance.ClientId = txtClientId.Text;
-            CherwellServiceApi.Instance.UserName = txtUserName.Text;
-            CherwellServiceApi.Instance.Password = txtPassword.Text;
-            CherwellServiceApi.Instance.ServiceApi = new ServiceApi(CherwellServiceApi.Instance.EndPoint);
+            ServiceApi.Instance = new ServiceApi($"{txtEndPoint.Text}/CherwellAPI", GrantTypes.password, txtClientId.Text, txtUserName.Text, txtPassword.Text, AuthModes.Internal);
             progressBar.MarqueeAnimationSpeed = 1;
             var result = false;
             try
@@ -81,25 +78,24 @@ namespace SaggerLookup
                 var task = Task.Run(
                     () =>
                     {
-                        StaticData.ActiveToken =
-                            CherwellServiceApi.Instance.GetServiceToken(true);
+                        ServiceApi.Instance.CheckTokenResponse();
                     },
                     cancellationToken.Token);
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
-                    if (StaticData.ActiveToken != null)
+                    if (ServiceApi.Instance.TokenResponse != null)
                     {
                         var tokenInfo = new StringBuilder();
-                        tokenInfo.AppendLine(StaticData.ActiveToken.TokenType + " " +
-                                             StaticData.ActiveToken.AccessToken);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.AsclientId);
+                        tokenInfo.AppendLine(ServiceApi.Instance.TokenResponse.TokenType + " " +
+                                             ServiceApi.Instance.TokenResponse.AccessToken);
+                        tokenInfo.AppendLine(ServiceApi.Instance.TokenResponse.AsclientId);
                         tokenInfo.AppendLine(
-                            StaticData.ActiveToken.Expires + " " + StaticData.ActiveToken.ExpiresIn);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.Issued);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.RefreshToken);
-                        tokenInfo.AppendLine(StaticData.ActiveToken.Username);
+                            ServiceApi.Instance.TokenResponse.Expires + " " + ServiceApi.Instance.TokenResponse.ExpiresIn);
+                        tokenInfo.AppendLine(ServiceApi.Instance.TokenResponse.Issued);
+                        tokenInfo.AppendLine(ServiceApi.Instance.TokenResponse.RefreshToken);
+                        tokenInfo.AppendLine(ServiceApi.Instance.TokenResponse.Username);
                         result = true;
-                        txtTokenResponse.Invoke((MethodInvoker) delegate
+                        txtTokenResponse.Invoke((MethodInvoker)delegate
                         {
                             txtTokenResponse.Text = tokenInfo.ToString();
                         });
@@ -122,7 +118,7 @@ namespace SaggerLookup
                     Settings.Default.Save();
                 }
 
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -140,9 +136,9 @@ namespace SaggerLookup
 
         private async void btnSummaries_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
-            var summaryList = new List<Summary>();
+            var summaryList = new List<List<Summary>>();
             try
             {
                 using var cancellationToken = new CancellationTokenSource();
@@ -151,13 +147,16 @@ namespace SaggerLookup
                     {
                         var list = txtObjectList.Text.Replace("\n", "").Replace("\r", "");
                         var objectList = list.Split(',');
+                        if(!objectList.Any()) return;
+                     
+                        summaryList.AddRange(objectList.Select(item => BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(item)).Where(summary => summary != null));
 
-                        summaryList.AddRange(objectList.Select(item => CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(item)).Where(summary => summary != null));
+
                     },
                     cancellationToken.Token);
                 if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
                 _saveFile = summaryList;
-                txtResultBox.Invoke((MethodInvoker) delegate
+                txtResultBox.Invoke((MethodInvoker)delegate
                 {
                     txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(summaryList))
                         .ToString(Formatting.Indented);
@@ -169,7 +168,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -180,7 +179,7 @@ namespace SaggerLookup
         private void Save_Click(object sender, EventArgs e)
         {
             if (_saveFile == null) return;
-            var saveFileDialog1 = new SaveFileDialog {Filter = Resources.Form1_Save_Click_JSON_File_____json, Title = Resources.Form1_Save_Click_Save_an_json_File};
+            var saveFileDialog1 = new SaveFileDialog { Filter = Resources.Form1_Save_Click_JSON_File_____json, Title = Resources.Form1_Save_Click_Save_an_json_File };
             saveFileDialog1.ShowDialog();
 
             if (saveFileDialog1.FileName == "") return;
@@ -195,7 +194,7 @@ namespace SaggerLookup
 
         private async void BtnSchemas_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var schemaResponses = new List<SchemaResponse>();
             try
@@ -209,18 +208,18 @@ namespace SaggerLookup
 
                         foreach (var item in objectList)
                         {
-                            var summary = CherwellBusinessObjectApi.Instance
+                            var summary = BusinessObjectApi.Instance
                                 .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
                             if (summary == null) continue;
                             var schema =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                    summary.BusObId);
+                                BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                    summary[0].BusObId);
                             schemaResponses.Add(schema);
-                            if (summary.Group == null || !(bool) summary.Group) continue;
-                            foreach (var groupSummary in summary.GroupSummaries)
+                            if (summary[0].Group == null || !(bool)summary[0].Group) continue;
+                            foreach (var groupSummary in summary[0].GroupSummaries)
                             {
                                 schema =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                   BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
                                         groupSummary.BusObId);
                                 schemaResponses.Add(schema);
                             }
@@ -230,7 +229,7 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = schemaResponses;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                    txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(schemaResponses))
                             .ToString(Formatting.Indented);
@@ -243,7 +242,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -253,7 +252,7 @@ namespace SaggerLookup
 
         private async void BtnTemplates_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var templateResponses = new List<TemplateResponse>();
             try
@@ -267,23 +266,23 @@ namespace SaggerLookup
 
                         foreach (var item in objectList)
                         {
-                            var summary = CherwellBusinessObjectApi.Instance
+                            var summary = BusinessObjectApi.Instance
                                 .BusinessObjectGetBusinessObjectSummaryByNameV1(item);
                             if (summary == null) continue;
                             var templateRequest = new TemplateRequest
                             {
-                                BusObId = summary.BusObId,
+                                BusObId = summary[0].BusObId,
                                 IncludeRequired = true,
                                 IncludeAll = true
                             };
                             var template =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
+                                BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
                                     templateRequest);
-                            template.BusObId = summary.BusObId;
-                            template.BusObName = summary.Name;
+                            template.BusObId = summary[0].BusObId;
+                            template.BusObName = summary[0].Name;
                             templateResponses.Add(template);
-                            if (summary.Group == null || !(bool) summary.Group) continue;
-                            foreach (var groupSummary in summary.GroupSummaries)
+                            if (summary[0].Group == null || !(bool)summary[0].Group) continue;
+                            foreach (var groupSummary in summary[0].GroupSummaries)
                             {
                                 templateRequest = new TemplateRequest
                                 {
@@ -292,7 +291,7 @@ namespace SaggerLookup
                                     IncludeAll = true
                                 };
                                 template =
-                                    CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
+                                    BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectTemplateV1(
                                         templateRequest);
                                 template.BusObId = groupSummary.BusObId;
                                 template.BusObName = groupSummary.Name;
@@ -304,7 +303,7 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = templateResponses;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                    txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(templateResponses))
                             .ToString(Formatting.Indented);
@@ -317,7 +316,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -327,8 +326,8 @@ namespace SaggerLookup
 
         private void BtnAddFilter_Click(object sender, EventArgs e)
         {
-            _filters.Add(new Filters {Field = txtFieldName.Text, Operator = txtOperator.Text, Value = txtValue.Text});
-            txtResultBox.Invoke((MethodInvoker) delegate
+            _filters.Add(new Filters { Field = txtFieldName.Text, Operator = txtOperator.Text, Value = txtValue.Text });
+            txtResultBox.Invoke((MethodInvoker)delegate
             {
                 txtFilterList.Text = JToken.Parse(JsonConvert.SerializeObject(_filters))
                     .ToString(Formatting.Indented);
@@ -344,7 +343,7 @@ namespace SaggerLookup
 
         private async void btnGetLookup_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             if (string.IsNullOrEmpty(txtLookup.Text)) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var readResponses = new List<ReadResponse>();
@@ -356,20 +355,20 @@ namespace SaggerLookup
                     () =>
                     {
                         var summary =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                            BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                 txtLookup.Text);
                         var schema =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                summary.BusObId);
+                            BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                summary[0].BusObId);
                         var list = txtFields.Text.Replace("\n", "").Replace("\r", "");
                         var fieldList = list.Split(',');
 
                         var filterInfoList = (from filter in _filters
-                            let fieldId =
-                                schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
-                            where !string.IsNullOrEmpty(fieldId)
-                            select new FilterInfo
-                                {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+                                              let fieldId =
+                                                  schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
+                                              where !string.IsNullOrEmpty(fieldId)
+                                              select new FilterInfo
+                                              { FieldId = fieldId, Operator = filter.Operator, Value = filter.Value }).ToList();
 
                         var fields = fieldList
                             .Select(field => schema.FieldDefinitions.SingleOrDefault(x => x.Name == field)?.FieldId)
@@ -377,14 +376,14 @@ namespace SaggerLookup
 
                         var searchResultsRequest = new SearchResultsRequest
                         {
-                            BusObId = summary.BusObId,
+                            BusObId = summary[0].BusObId,
                             IncludeAllFields = !fields.Any(),
                             Fields = fields.Any() ? fields : null,
                             Filters = filterInfoList,
                             PageSize = 20000
                         };
 
-                        readResponses = CherwellSearchesApi.Instance
+                        readResponses = SearchesApi.Instance
                             .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
 
                     },
@@ -392,7 +391,7 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = readResponses;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                    txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(readResponses))
                             .ToString(Formatting.Indented);
@@ -405,7 +404,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -416,7 +415,7 @@ namespace SaggerLookup
 
         private async void BtnGetUsers_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
 
             progressBar.MarqueeAnimationSpeed = 1;
             if (chkStoreIndiviual.Checked)
@@ -434,11 +433,11 @@ namespace SaggerLookup
                     () =>
                     {
                         var summary =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                            BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                 "UserInfo");
                         var schema =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
-                                summary.BusObId);
+                            BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                summary[0].BusObId);
                         var list = txtUserFields.Text.Replace("\n", "").Replace("\r", "");
                         var fieldList = list.Split(',');
 
@@ -448,47 +447,48 @@ namespace SaggerLookup
 
                         var searchResultRequest = new SearchResultsRequest
                         {
-                            BusObId = summary.BusObId,
+                            BusObId = summary[0].BusObId,
                             Filters = new List<FilterInfo>(),
                             PageSize = 20000,
                             IncludeAllFields = false
                         };
 
                         var searchResponse =
-                            CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest);
+                            SearchesApi.Instance.SearchesGetSearchResultsAdHocV1(searchResultRequest);
                         var count = 0;
                         foreach (var readResponse in searchResponse.BusinessObjects)
                         {
                             var filterInfo = new FilterInfo
                             {
-                                FieldId = schema.FirstRecIdField, Operator = "eq", Value = readResponse.BusObRecId
+                                FieldId = schema.FirstRecIdField,
+                                Operator = "eq",
+                                Value = readResponse.BusObRecId
                             };
                             searchResultRequest.BusObId = readResponse.BusObId;
-                            searchResultRequest.Filters = new List<FilterInfo> {filterInfo};
+                            searchResultRequest.Filters = new List<FilterInfo> { filterInfo };
                             searchResultRequest.IncludeAllFields = !fieldIds.Any();
                             searchResultRequest.PageSize = 20000;
                             searchResultRequest.Fields = fieldIds.Any() ? fieldIds : null;
 
                             lblUserTotal.Invoke((MethodInvoker)delegate
                             {
-                                lblUserTotal.Text = $"Downloading {++count} of {searchResponse.BusinessObjects.Count} users";
+                                lblUserTotal.Text = $@"Downloading {++count} of {searchResponse.BusinessObjects.Count} users";
                             });
 
-                            var item = CherwellSearchesApi.Instance
+                            var item = SearchesApi.Instance
                                 .SearchesGetSearchResultsAdHocV1(searchResultRequest).BusinessObjects
                                 .SingleOrDefault(x => x.BusObRecId == readResponse.BusObRecId);
                             if (item == null) continue;
 
                             byte[] avatarBytes = null;
-                            if (!string.IsNullOrEmpty(item.ReadFieldInformation("Avatar")))
+                            if (!string.IsNullOrEmpty(item.ReadFieldInformation(nameof(UserInfo.Avatar))))
                             {
                                 avatarBytes =
-                                    CherwellCoreApi.Instance.CoreGetGalleryImageV1(
-                                        item.ReadFieldInformation("Avatar"),
-                                        null, null);
+                                    CoreApi.Instance.CoreGetGalleryImageV1(
+                                        item.ReadFieldInformation(nameof(UserInfo.Avatar)));
                             }
 
-                            var teams = CherwellTeamsApi.Instance.TeamsGetUsersTeamsV2(item.BusObRecId);
+                            var teams = TeamsApi.Instance.TeamsGetUsersTeamsV2(item.BusObRecId);
 
 
                             var info = new UserInfo
@@ -525,7 +525,7 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = users;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                    txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(users))
                             .ToString(Formatting.Indented);
@@ -538,7 +538,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -548,7 +548,7 @@ namespace SaggerLookup
 
         private async void btnGetTeams_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
 
             progressBar.MarqueeAnimationSpeed = 1;
 
@@ -559,7 +559,7 @@ namespace SaggerLookup
                 var task = Task.Run(
                     () =>
                     {
-                        teams = CherwellTeamsApi.Instance.TeamsGetTeamsV2Async().Teams;
+                        teams = TeamsApi.Instance.TeamsGetTeamsV2().Teams;
 
 
                         foreach (var team in teams)
@@ -567,7 +567,7 @@ namespace SaggerLookup
                             team.Type = TeamType.Team.ToString();
                         }
 
-                        var workGroups = CherwellTeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
+                        var workGroups = TeamsApi.Instance.TeamsGetWorkgroupsV2().Teams;
 
                         foreach (var workgroup in workGroups)
                         {
@@ -580,7 +580,7 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = teams;
-                    txtResultBox.Invoke((MethodInvoker) delegate
+                    txtResultBox.Invoke((MethodInvoker)delegate
                     {
                         txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(teams))
                             .ToString(Formatting.Indented);
@@ -593,7 +593,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -607,10 +607,11 @@ namespace SaggerLookup
         {
             _filters.Add(new Filters
             {
-                Field = txtCustomerFilterFieldName.Text, Operator = txCustomerFieldOperator.Text,
+                Field = txtCustomerFilterFieldName.Text,
+                Operator = txCustomerFieldOperator.Text,
                 Value = txtCustomerFieldValue.Text
             });
-            txtResultBox.Invoke((MethodInvoker) delegate
+            txtResultBox.Invoke((MethodInvoker)delegate
             {
                 txtCustomerFilters.Text = JToken.Parse(JsonConvert.SerializeObject(_filters))
                     .ToString(Formatting.Indented);
@@ -625,7 +626,7 @@ namespace SaggerLookup
 
         private async void BtnCustomerGetItems_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
 
             if (chkStoreAsIndivilual.Checked)
@@ -643,24 +644,24 @@ namespace SaggerLookup
                 var task = Task.Run(
                     () =>
                     {
-                        lblCount.Invoke((MethodInvoker) delegate { lblCount.Text = string.Empty; });
+                        lblCount.Invoke((MethodInvoker)delegate { lblCount.Text = string.Empty; });
                         var summary =
-                            CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                            BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                 "Customer");
-                        foreach (var groupSummary in summary.GroupSummaries)
+                        foreach (var groupSummary in summary[0].GroupSummaries)
                         {
                             var schema =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
+                                BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSchemaV1(
                                     groupSummary.BusObId);
                             var list = txtCustomerFields.Text.Replace("\n", "").Replace("\r", "");
                             var fieldList = list.Split(',');
 
                             var filterInfoList = (from filter in _filters
-                                let fieldId =
-                                    schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
-                                where !string.IsNullOrEmpty(fieldId)
-                                select new FilterInfo
-                                    {FieldId = fieldId, Operator = filter.Operator, Value = filter.Value}).ToList();
+                                                  let fieldId =
+                                                      schema.FieldDefinitions.SingleOrDefault(x => x.Name == filter.Field)?.FieldId
+                                                  where !string.IsNullOrEmpty(fieldId)
+                                                  select new FilterInfo
+                                                  { FieldId = fieldId, Operator = filter.Operator, Value = filter.Value }).ToList();
 
                             var fields = fieldList
                                 .Select(field =>
@@ -669,14 +670,14 @@ namespace SaggerLookup
 
                             var searchResultsRequest = new SearchResultsRequest
                             {
-                                BusObId = summary.BusObId,
+                                BusObId = summary[0].BusObId,
                                 IncludeAllFields = false,
                                 Fields = null,
                                 Filters = filterInfoList,
                                 PageSize = 20000
                             };
 
-                            var readResponses = CherwellSearchesApi.Instance
+                            var readResponses = SearchesApi.Instance
                                 .SearchesGetSearchResultsAdHocV1(searchResultsRequest).BusinessObjects;
                             foreach (var response in readResponses)
                             {
@@ -687,7 +688,7 @@ namespace SaggerLookup
                                     Fields = fields,
                                     Filters = new List<FilterInfo>
                                     {
-                                        new FilterInfo
+                                        new()
                                         {
                                             FieldId = schema.RecIdFields,
                                             Operator = "eq",
@@ -696,22 +697,21 @@ namespace SaggerLookup
                                     },
                                 };
                                 var newCustomer =
-                                    CherwellSearchesApi.Instance.SearchesGetSearchResultsAdHocV1(
+                                    SearchesApi.Instance.SearchesGetSearchResultsAdHocV1(
                                         searchResultsRequest);
 
                                 if (newCustomer?.BusinessObjects == null) continue;
                                 foreach (var readResponse in newCustomer.BusinessObjects)
 
                                 {
-                                    var avatarBytes = new byte[0];
-                                    var avatar = readResponse.ReadFieldInformation("Avatar");
+                                    var avatarBytes = Array.Empty<byte>();
+                                    var avatar = readResponse.ReadFieldInformation(nameof(UserInfo.Avatar));
                                     if (!string.IsNullOrEmpty(avatar))
                                     {
                                         try
                                         {
                                             avatarBytes =
-                                                CherwellCoreApi.Instance.CoreGetGalleryImageV1(avatar, null,
-                                                    null);
+                                                CoreApi.Instance.CoreGetGalleryImageV1(avatar);
                                         }
                                         catch (Exception)
                                         {
@@ -754,10 +754,11 @@ namespace SaggerLookup
                                         Mobile = readResponse.ReadFieldInformation(nameof(Customer.Mobile))
                                     };
                                     customers.Add(customer);
-                                    lblCount.Invoke((MethodInvoker) delegate
+                                    lblCount.Invoke((MethodInvoker)delegate
                                     {
                                         lblCount.Text =
-                                            $"Downloaded Customer {customers.Count} out of {readResponses.Count}";});
+                                            $@"Downloaded Customer {customers.Count} out of {readResponses.Count}";
+                                    });
                                     if (!chkStoreAsIndivilual.Checked) continue;
                                     if (string.IsNullOrEmpty(folderBrowserDialog1.SelectedPath)) return;
                                     using var file =
@@ -776,11 +777,6 @@ namespace SaggerLookup
                 if (await Task.WhenAny(task).ConfigureAwait(false) == task)
                 {
                     _saveFile = customers;
-                    //txtResultBox.Invoke((MethodInvoker) delegate
-                    //{
-                    //    txtResultBox.Text = JToken.Parse(JsonConvert.SerializeObject(customers))
-                    //        .ToString(Formatting.Indented);
-                    //});
                 }
             }
 
@@ -792,7 +788,7 @@ namespace SaggerLookup
             }
             finally
             {
-                progressBar.Invoke((MethodInvoker) delegate
+                progressBar.Invoke((MethodInvoker)delegate
                 {
                     progressBar.MarqueeAnimationSpeed = 0;
                     progressBar.Refresh();
@@ -802,9 +798,9 @@ namespace SaggerLookup
 
         private async void btnSearches_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
-            var searchFolders = new List<SearchFolder>();
+            var searchFolders = new List<SearchesSearchFolder>();
             try
             {
                 using var cancellationToken = new CancellationTokenSource();
@@ -816,13 +812,13 @@ namespace SaggerLookup
                         foreach (var association in objectList)
                         {
                             var summary =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                     association);
                             if (summary == null) continue;
 
                             var searchFolder =
-                                CherwellSearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(
-                                    summary.BusObId);
+                                SearchesApi.Instance.SearchesGetSearchItemsByAssociationV1(
+                                    summary[0].BusObId);
                             searchFolders.Add(searchFolder.Root);
                         }
                     },
@@ -852,7 +848,7 @@ namespace SaggerLookup
 
         private async void btnOneSteps_Click(object sender, EventArgs e)
         {
-            if (StaticData.ActiveToken == null) return;
+            if (ServiceApi.Instance.TokenResponse == null) return;
             progressBar.MarqueeAnimationSpeed = 1;
             var oneStepFolders = new List<ManagerFolder>();
             try
@@ -866,18 +862,18 @@ namespace SaggerLookup
                         foreach (var association in objectList)
                         {
                             var summary =
-                                CherwellBusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
+                                BusinessObjectApi.Instance.BusinessObjectGetBusinessObjectSummaryByNameV1(
                                     association);
                             if (summary == null) continue;
                             var oneSteps =
-                                CherwellOneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary.BusObId);
+                                OneStepActionsApi.Instance.OneStepActionsGetOneStepActionsByAssociationV1(summary[0].BusObId);
                             if (oneSteps == null) continue;
-                            
+
                             oneStepFolders.Add(oneSteps.Root);
                         }
                     },
                     cancellationToken.Token);
-                if (await Task.WhenAny(task).ConfigureAwait(false) != task) return; 
+                if (await Task.WhenAny(task).ConfigureAwait(false) != task) return;
                 _saveFile = oneStepFolders;
                 txtResultBox.Invoke((MethodInvoker)delegate
                 {
@@ -897,6 +893,30 @@ namespace SaggerLookup
                     progressBar.Refresh();
                 });
             }
+        }
+
+        private void txtEndPoint_TextChanged(object sender, EventArgs e)
+        {
+            Settings.Default.Endpoint = txtEndPoint.Text;
+            Settings.Default.Save();
+        }
+
+        private void txtClientId_TextChanged(object sender, EventArgs e)
+        {
+            Settings.Default.ClientID = txtClientId.Text;
+            Settings.Default.Save();
+        }
+
+        private void txtUserName_TextChanged(object sender, EventArgs e)
+        {
+            Settings.Default.UserName = txtUserName.Text;
+            Settings.Default.Save();
+        }
+
+        private void txtPassword_TextChanged(object sender, EventArgs e)
+        {
+            Settings.Default.Password = txtPassword.Text;
+            Settings.Default.Save();
         }
     }
 

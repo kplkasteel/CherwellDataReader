@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using SaggerLookup.Swagger.Model;
+using SwaggerLookup.Helpers.CherwellConnector.Model;
 
-namespace SaggerLookup.Models
+namespace SwaggerLookup.Models
 {
     public class UserInfo
     {

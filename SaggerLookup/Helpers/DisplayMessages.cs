@@ -1,10 +1,9 @@
 ﻿using System.Windows.Forms;
 using Newtonsoft.Json;
-using RestSharp;
-using SaggerLookup.Models;
-using SaggerLookup.Swagger.Client;
+using SwaggerLookup.Helpers.CherwellConnector.Client;
+using SwaggerLookup.Models;
 
-namespace SaggerLookup.Helpers
+namespace SwaggerLookup.Helpers
 {
     public static class Display    
     {

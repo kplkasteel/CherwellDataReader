@@ -1,4 +1,4 @@
-﻿namespace SaggerLookup.Models
+﻿namespace SwaggerLookup.Models
 {
     public class Customer
     {
